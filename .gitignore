@@ -1,0 +1,4 @@
+.playwright-mcp/
+files/
+.git/
+.DS_Store
