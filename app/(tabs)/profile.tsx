@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, TextInput, Modal } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -10,28 +10,18 @@ import { useQuizStore } from '../../src/store/quizStore';
 import { usersService } from '../../src/services/users';
 import { LoadingScreen } from '../../src/components/ui/LoadingScreen';
 import { LANGUAGE_LABELS } from '../../src/types';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 
 const APP_VERSION: string = (Constants.expoConfig?.version as string | undefined) ?? '1.0.0';
 
-interface SettingsRowProps {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-  color?: string;
-}
-
-function SettingsRow({ icon, label, onPress, color = '#1A1A1A' }: SettingsRowProps): JSX.Element {
+function SettingsRow({ icon, label, onPress, color = colors.foreground }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; color?: string }): JSX.Element {
   return (
-    <TouchableOpacity
-      className="flex-row items-center py-3 border-b border-border"
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View className="w-8 h-8 rounded-lg bg-card items-center justify-center mr-3">
+    <TouchableOpacity style={styles.settingsRow} onPress={onPress} activeOpacity={0.7}>
+      <View style={styles.settingsIcon}>
         <Ionicons name={icon} size={16} color={color} />
       </View>
-      <Text className="flex-1 text-sm font-body" style={{ color }}>{label}</Text>
-      <Ionicons name="chevron-forward" size={14} color="#B4B2A9" />
+      <Text style={[styles.settingsLabel, { color }]}>{label}</Text>
+      <Ionicons name="chevron-forward" size={14} color={colors.hint} />
     </TouchableOpacity>
   );
 }
@@ -46,43 +36,22 @@ export default function ProfileScreen(): JSX.Element {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [showRetakeModal, setShowRetakeModal] = useState(false);
 
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['user', userId],
-    queryFn: () => usersService.getById(userId),
-  });
+  const { data: user, isLoading } = useQuery({ queryKey: ['user', userId], queryFn: () => usersService.getById(userId) });
 
   const updateUserMutation = useMutation({
-    mutationFn: (data: { primaryLanguage: null; languageScores: null }) =>
-      usersService.update(userId, data),
+    mutationFn: (data: { primaryLanguage: null; languageScores: null }) => usersService.update(userId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['user', userId] }),
   });
 
   if (isLoading) return <LoadingScreen />;
 
-  const initials = user?.name
-    ?.split(' ')
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() ?? 'ME';
-
-  const primaryLanguage = user?.primaryLanguage
-    ? LANGUAGE_LABELS[user.primaryLanguage as keyof typeof LANGUAGE_LABELS]
-    : null;
+  const initials = user?.name?.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() ?? 'ME';
+  const primaryLanguage = user?.primaryLanguage ? LANGUAGE_LABELS[user.primaryLanguage as keyof typeof LANGUAGE_LABELS] : null;
 
   function handleSignOut(): void {
     Alert.alert('Sign out?', 'You will be returned to the welcome screen.', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign out',
-        style: 'destructive',
-        onPress: () => {
-          clearSession();
-          clearQuiz();
-          queryClient.clear();
-          router.replace('/(onboarding)/');
-        },
-      },
+      { text: 'Sign out', style: 'destructive', onPress: () => { clearSession(); clearQuiz(); queryClient.clear(); router.replace('/(onboarding)/'); } },
     ]);
   }
 
@@ -95,182 +64,172 @@ export default function ProfileScreen(): JSX.Element {
 
   function handleDeleteAccount(): void {
     if (deleteConfirmText !== 'DELETE') return;
-    Alert.alert(
-      'Account deleted',
-      'All data has been removed.',
-      [{ text: 'OK', onPress: () => { clearSession(); router.replace('/(onboarding)/'); } }],
-    );
+    Alert.alert('Account deleted', 'All data has been removed.', [{ text: 'OK', onPress: () => { clearSession(); router.replace('/(onboarding)/'); } }]);
     setShowDeleteModal(false);
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-4 pb-2">
-        <View className="w-6" />
-        <Text className="flex-1 text-center text-sm font-heading text-primary">LovePath</Text>
-        <View className="w-6" />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.spacer} />
+        <Text style={styles.headerTitle}>LovePath</Text>
+        <View style={styles.spacer} />
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* Avatar + name */}
-        <View className="items-center mt-6 mb-6">
-          <View className="relative mb-3">
-            <View className="w-20 h-20 rounded-full bg-rose-tint items-center justify-center">
-              <Text className="text-2xl font-heading text-primary">{initials}</Text>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.avatarBlock}>
+          <View style={styles.avatarWrap}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarInitials}>{initials}</Text>
             </View>
-            <View className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary items-center justify-center">
-              <Ionicons name="pencil" size={10} color="#FFF" />
+            <View style={styles.editBadge}>
+              <Ionicons name="pencil" size={10} color={colors.white} />
             </View>
           </View>
-          <Text className="text-xl font-heading text-foreground mb-0.5">{user?.name ?? 'You'}</Text>
+          <Text style={styles.userName}>{user?.name ?? 'You'}</Text>
           {user?.partnerId ? (
-            <Text className="text-xs font-body text-muted">
-              Connected with partner
-            </Text>
+            <Text style={styles.partnerStatus}>Connected with partner</Text>
           ) : (
             <TouchableOpacity onPress={() => router.push('/partner/invite')}>
-              <Text className="text-xs font-body text-primary">Connect with partner →</Text>
+              <Text style={styles.connectLink}>Connect with partner →</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* Love Language insight */}
         {primaryLanguage && (
-          <View className="bg-rose-tint rounded-2xl p-4 mb-5">
-            <Text className="text-xs font-body text-muted mb-1 uppercase tracking-widest">
-              Relationship Insight
-            </Text>
-            <View className="flex-row items-center justify-between">
+          <View style={styles.insightCard}>
+            <Text style={styles.insightLabel}>Relationship Insight</Text>
+            <View style={styles.insightRow}>
               <View>
-                <Text className="text-xs font-body text-muted">Your love language</Text>
-                <Text className="text-base font-heading text-primary">{primaryLanguage}</Text>
+                <Text style={styles.insightSubLabel}>Your love language</Text>
+                <Text style={styles.insightValue}>{primaryLanguage}</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => setShowRetakeModal(true)}
-                className="px-3 py-1.5 rounded-full border border-primary"
-              >
-                <Text className="text-xs font-heading text-primary">Retake quiz</Text>
+              <TouchableOpacity onPress={() => setShowRetakeModal(true)} style={styles.retakeBtn}>
+                <Text style={styles.retakeBtnText}>Retake quiz</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
-        {/* Relationship section */}
-        <Text className="text-xs font-body text-muted tracking-widest uppercase mb-2">Relationship</Text>
-        <View className="bg-card rounded-2xl px-4 mb-5 border border-border">
-          <SettingsRow
-            icon="people-outline"
-            label="Partner Details"
-            onPress={() => router.push('/partner/invite')}
-          />
-          <SettingsRow
-            icon="calendar-outline"
-            label="Anniversary & Milestones"
-            onPress={() => Alert.alert('Coming soon', 'Anniversary tracking is on the roadmap.')}
-          />
+        <Text style={styles.sectionLabel}>Relationship</Text>
+        <View style={styles.settingsCard}>
+          <SettingsRow icon="people-outline" label="Partner Details" onPress={() => router.push('/partner/invite')} />
+          <SettingsRow icon="calendar-outline" label="Anniversary & Milestones" onPress={() => Alert.alert('Coming soon', 'Anniversary tracking is on the roadmap.')} />
         </View>
 
-        {/* Data & Privacy */}
-        <Text className="text-xs font-body text-muted tracking-widest uppercase mb-2">Data & Privacy</Text>
-        <View className="bg-card rounded-2xl px-4 mb-5 border border-border">
-          <SettingsRow
-            icon="lock-closed-outline"
-            label="Security Settings"
-            onPress={() => Alert.alert('Security', 'Password change coming soon.')}
-          />
-          <SettingsRow
-            icon="download-outline"
-            label="Export Data"
-            onPress={() => Alert.alert('Export', 'Data export will be emailed to you.')}
-          />
-          <SettingsRow
-            icon="trash-outline"
-            label="Delete Account"
-            onPress={() => setShowDeleteModal(true)}
-            color="#E24B4A"
-          />
+        <Text style={styles.sectionLabel}>Data & Privacy</Text>
+        <View style={styles.settingsCard}>
+          <SettingsRow icon="lock-closed-outline" label="Security Settings" onPress={() => Alert.alert('Security', 'Password change coming soon.')} />
+          <SettingsRow icon="download-outline" label="Export Data" onPress={() => Alert.alert('Export', 'Data export will be emailed to you.')} />
+          <SettingsRow icon="trash-outline" label="Delete Account" onPress={() => setShowDeleteModal(true)} color={colors.danger} />
         </View>
 
-        {/* About */}
-        <Text className="text-xs font-body text-muted tracking-widest uppercase mb-2">About</Text>
-        <View className="bg-card rounded-2xl px-4 mb-5 border border-border">
-          <View className="flex-row items-center py-3 border-b border-border">
-            <View className="w-2 h-2 rounded-full bg-green-500 mr-3 ml-0.5" />
-            <Text className="flex-1 text-sm font-body text-foreground">Version {APP_VERSION}</Text>
+        <Text style={styles.sectionLabel}>About</Text>
+        <View style={styles.settingsCard}>
+          <View style={styles.versionRow}>
+            <View style={styles.greenDot} />
+            <Text style={styles.versionText}>Version {APP_VERSION}</Text>
           </View>
-          <SettingsRow
-            icon="help-circle-outline"
-            label="Help Center"
-            onPress={() => Alert.alert('Help', 'Visit lovepath.app/help for support.')}
-          />
+          <SettingsRow icon="help-circle-outline" label="Help Center" onPress={() => Alert.alert('Help', 'Visit lovepath.app/help for support.')} />
         </View>
 
-        {/* Sign out */}
-        <TouchableOpacity
-          className="items-center py-4 mb-8"
-          onPress={handleSignOut}
-        >
-          <Text className="text-sm font-heading text-primary">Sign out</Text>
+        <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
+          <Text style={styles.signOutText}>Sign out</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Retake quiz modal */}
       <Modal visible={showRetakeModal} transparent animationType="slide" onRequestClose={() => setShowRetakeModal(false)}>
-        <TouchableOpacity className="flex-1 bg-black/40" activeOpacity={1} onPress={() => setShowRetakeModal(false)} />
-        <View className="bg-background rounded-t-3xl px-5 pt-6 pb-10">
-          <Text className="text-lg font-heading text-foreground mb-2">Retake the quiz?</Text>
-          <Text className="text-sm font-body text-muted mb-6">
-            Your current love language result will be cleared. You can retake the quiz to get an updated result.
-          </Text>
-          <TouchableOpacity
-            className="w-full bg-primary rounded-full py-4 items-center mb-3"
-            onPress={handleRetakeQuiz}
-          >
-            <Text className="text-white text-base font-heading">Yes, retake quiz</Text>
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={() => setShowRetakeModal(false)} />
+        <View style={styles.sheet}>
+          <Text style={styles.sheetTitle}>Retake the quiz?</Text>
+          <Text style={styles.sheetBody}>Your current love language result will be cleared. You can retake the quiz to get an updated result.</Text>
+          <TouchableOpacity style={styles.primaryBtn} onPress={handleRetakeQuiz}>
+            <Text style={styles.primaryBtnText}>Yes, retake quiz</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center py-3" onPress={() => setShowRetakeModal(false)}>
-            <Text className="text-sm font-body text-muted">Cancel</Text>
+          <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowRetakeModal(false)}>
+            <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </Modal>
 
-      {/* Delete account modal */}
       <Modal visible={showDeleteModal} transparent animationType="slide" onRequestClose={() => setShowDeleteModal(false)}>
-        <TouchableOpacity className="flex-1 bg-black/40" activeOpacity={1} onPress={() => setShowDeleteModal(false)} />
-        <View className="bg-background rounded-t-3xl px-5 pt-6 pb-10">
-          <Text className="text-lg font-heading text-foreground mb-2">Delete account?</Text>
-          <Text className="text-sm font-body text-muted mb-4">
-            All your data will be permanently removed. This cannot be undone. Type DELETE to confirm.
-          </Text>
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={() => setShowDeleteModal(false)} />
+        <View style={styles.sheet}>
+          <Text style={styles.sheetTitle}>Delete account?</Text>
+          <Text style={styles.sheetBody}>All your data will be permanently removed. This cannot be undone. Type DELETE to confirm.</Text>
           <TextInput
-            className="bg-card border border-border rounded-xl px-4 py-3 text-sm font-body text-foreground mb-5"
+            style={styles.deleteInput}
             placeholder="Type DELETE to confirm"
-            placeholderTextColor="#B4B2A9"
+            placeholderTextColor={colors.hint}
             value={deleteConfirmText}
             onChangeText={setDeleteConfirmText}
             autoCapitalize="characters"
           />
           <TouchableOpacity
-            className="w-full rounded-full py-4 items-center mb-3"
-            style={{
-              backgroundColor: deleteConfirmText === 'DELETE' ? '#E24B4A' : '#E8E6E0',
-            }}
+            style={[styles.primaryBtn, { backgroundColor: deleteConfirmText === 'DELETE' ? colors.danger : colors.border }]}
             onPress={handleDeleteAccount}
             disabled={deleteConfirmText !== 'DELETE'}
           >
-            <Text
-              className="text-base font-heading"
-              style={{ color: deleteConfirmText === 'DELETE' ? '#FFF' : '#B4B2A9' }}
-            >
-              Delete my account
-            </Text>
+            <Text style={[styles.primaryBtnText, { color: deleteConfirmText === 'DELETE' ? colors.white : colors.hint }]}>Delete my account</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center py-3" onPress={() => setShowDeleteModal(false)}>
-            <Text className="text-sm font-body text-muted">Cancel</Text>
+          <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowDeleteModal(false)}>
+            <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </Modal>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  spacer: { width: 24 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  avatarBlock: { alignItems: 'center', marginTop: 24, marginBottom: 24 },
+  avatarWrap: { position: 'relative', marginBottom: 12 },
+  avatar: { width: 80, height: 80, borderRadius: radii.full, backgroundColor: colors.roseTint, alignItems: 'center', justifyContent: 'center' },
+  avatarInitials: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.primary },
+  editBadge: { position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: radii.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  userName: { fontSize: fontSizes.xl, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 2 },
+  partnerStatus: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted },
+  connectLink: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.primary },
+  insightCard: { backgroundColor: colors.roseTint, borderRadius: radii.xl2, padding: 16, marginBottom: 20 },
+  insightLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginBottom: 4, letterSpacing: 2, textTransform: 'uppercase' },
+  insightRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  insightSubLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted },
+  insightValue: { fontSize: fontSizes.base, fontFamily: fonts.heading, color: colors.primary },
+  retakeBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: radii.full, borderWidth: 1, borderColor: colors.primary },
+  retakeBtnText: { fontSize: fontSizes.caption, fontFamily: fonts.heading, color: colors.primary },
+  sectionLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
+  settingsCard: { backgroundColor: colors.card, borderRadius: radii.xl2, paddingHorizontal: 16, marginBottom: 20, borderWidth: 1, borderColor: colors.border },
+  settingsRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+  settingsIcon: { width: 32, height: 32, borderRadius: 8, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  settingsLabel: { flex: 1, fontSize: fontSizes.sm, fontFamily: fonts.body },
+  versionRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+  greenDot: { width: 8, height: 8, borderRadius: radii.full, backgroundColor: '#22C55E', marginRight: 12, marginLeft: 2 },
+  versionText: { flex: 1, fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+  signOutBtn: { alignItems: 'center', paddingVertical: 16, marginBottom: 32 },
+  signOutText: { fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: { backgroundColor: colors.background, borderTopLeftRadius: radii.xl3, borderTopRightRadius: radii.xl3, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 },
+  sheetTitle: { fontSize: fontSizes.lg, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 8 },
+  sheetBody: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, marginBottom: 24 },
+  deleteInput: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.xl,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: fontSizes.sm,
+    fontFamily: fonts.body,
+    color: colors.foreground,
+    marginBottom: 20,
+  },
+  primaryBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, alignItems: 'center', marginBottom: 12 },
+  primaryBtnText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+  cancelBtn: { alignItems: 'center', paddingVertical: 12 },
+  cancelText: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted },
+});

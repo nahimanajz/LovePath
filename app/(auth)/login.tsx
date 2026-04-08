@@ -1,17 +1,10 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSessionStore } from '../../src/store/session';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 
 type AuthTab = 'login' | 'signup';
 
@@ -38,15 +31,9 @@ export default function LoginScreen(): JSX.Element {
 
   function validate(): boolean {
     const next: FieldError = {};
-    if (activeTab === 'signup' && !name.trim()) {
-      next.name = 'Name is required';
-    }
-    if (!validateEmail(email)) {
-      next.email = 'Enter a valid email address';
-    }
-    if (password.length < 8) {
-      next.password = 'Password must be at least 8 characters';
-    }
+    if (activeTab === 'signup' && !name.trim()) next.name = 'Name is required';
+    if (!validateEmail(email)) next.email = 'Enter a valid email address';
+    if (password.length < 8) next.password = 'Password must be at least 8 characters';
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -55,7 +42,6 @@ export default function LoginScreen(): JSX.Element {
     if (!validate()) return;
     setLoading(true);
     try {
-      // Dev: use hardcoded user 1
       setUserId(1);
       if (activeTab === 'signup') {
         router.replace('/love-languages/intro');
@@ -68,164 +54,119 @@ export default function LoginScreen(): JSX.Element {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView style={styles.flex1} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
-          className="flex-1"
+          style={styles.flex1}
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header */}
-          <View className="px-5 pt-4 pb-2">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+          <View style={styles.backBtn}>
+            <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name="chevron-back" size={24} color={colors.foreground} />
             </TouchableOpacity>
           </View>
 
-          <View className="flex-1 px-5 pt-6">
-            {/* Brand */}
-            <Text className="text-2xl font-heading text-foreground mb-1">
-              LovePath
-            </Text>
-            <Text className="text-sm font-body text-muted mb-8">
-              {activeTab === 'signup'
-                ? 'Create your account to get started'
-                : 'Welcome back'}
+          <View style={styles.body}>
+            <Text style={styles.brand}>LovePath</Text>
+            <Text style={styles.tagline}>
+              {activeTab === 'signup' ? 'Create your account to get started' : 'Welcome back'}
             </Text>
 
-            {/* Tab toggle */}
-            <View className="flex-row bg-[#F1F1EE] rounded-full p-1 mb-8">
+            <View style={styles.tabRow}>
               <TouchableOpacity
-                className={`flex-1 py-2 rounded-full items-center ${
-                  activeTab === 'signup' ? 'bg-white' : ''
-                }`}
+                style={[styles.tab, activeTab === 'signup' && styles.tabActive]}
                 onPress={() => { setActiveTab('signup'); setErrors({}); }}
               >
-                <Text
-                  className={`text-sm font-body ${
-                    activeTab === 'signup' ? 'text-foreground font-heading' : 'text-muted'
-                  }`}
-                >
-                  Sign Up
-                </Text>
+                <Text style={[styles.tabText, activeTab === 'signup' ? styles.tabTextActive : styles.tabTextInactive]}>Sign Up</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className={`flex-1 py-2 rounded-full items-center ${
-                  activeTab === 'login' ? 'bg-white' : ''
-                }`}
+                style={[styles.tab, activeTab === 'login' && styles.tabActive]}
                 onPress={() => { setActiveTab('login'); setErrors({}); }}
               >
-                <Text
-                  className={`text-sm font-body ${
-                    activeTab === 'login' ? 'text-foreground font-heading' : 'text-muted'
-                  }`}
-                >
-                  Log In
-                </Text>
+                <Text style={[styles.tabText, activeTab === 'login' ? styles.tabTextActive : styles.tabTextInactive]}>Log In</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Name field (sign up only) */}
             {activeTab === 'signup' && (
-              <View className="mb-4">
-                <Text className="text-xs font-body text-muted mb-1">Name</Text>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Name</Text>
                 <TextInput
-                  className="border border-border rounded-[12px] px-4 py-3 text-foreground text-sm font-body bg-card"
+                  style={styles.input}
                   placeholder="Your name"
-                  placeholderTextColor="#B4B2A9"
+                  placeholderTextColor={colors.hint}
                   value={name}
                   onChangeText={(t) => { setName(t); setErrors((e) => ({ ...e, name: undefined })); }}
                   autoCapitalize="words"
                 />
-                {errors.name && (
-                  <Text className="text-xs text-danger mt-1">{errors.name}</Text>
-                )}
+                {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
               </View>
             )}
 
-            {/* Email field */}
-            <View className="mb-4">
-              <Text className="text-xs font-body text-muted mb-1">Email</Text>
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>Email</Text>
               <TextInput
-                className="border border-border rounded-[12px] px-4 py-3 text-foreground text-sm font-body bg-card"
+                style={styles.input}
                 placeholder="you@example.com"
-                placeholderTextColor="#B4B2A9"
+                placeholderTextColor={colors.hint}
                 value={email}
                 onChangeText={(t) => { setEmail(t); setErrors((e) => ({ ...e, email: undefined })); }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              {errors.email && (
-                <Text className="text-xs text-danger mt-1">{errors.email}</Text>
-              )}
+              {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </View>
 
-            {/* Password field */}
-            <View className="mb-8">
-              <Text className="text-xs font-body text-muted mb-1">Password</Text>
-              <View className="border border-border rounded-[12px] flex-row items-center bg-card px-4">
+            <View style={styles.fieldGroupLg}>
+              <Text style={styles.fieldLabel}>Password</Text>
+              <View style={styles.passwordRow}>
                 <TextInput
-                  className="flex-1 py-3 text-foreground text-sm font-body"
+                  style={styles.passwordInput}
                   placeholder="Min. 8 characters"
-                  placeholderTextColor="#B4B2A9"
+                  placeholderTextColor={colors.hint}
                   value={password}
                   onChangeText={(t) => { setPassword(t); setErrors((e) => ({ ...e, password: undefined })); }}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                 />
                 <TouchableOpacity onPress={() => setShowPassword((v) => !v)}>
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={18}
-                    color="#888780"
-                  />
+                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={colors.muted} />
                 </TouchableOpacity>
               </View>
               {errors.password ? (
-                <Text className="text-xs text-danger mt-1">{errors.password}</Text>
+                <Text style={styles.errorText}>{errors.password}</Text>
               ) : (
-                <Text className="text-xs text-hint mt-1">Minimum 8 characters</Text>
+                <Text style={styles.hintText}>Minimum 8 characters</Text>
               )}
             </View>
 
-            {/* Submit button */}
             <TouchableOpacity
-              className={`w-full rounded-full py-4 items-center mb-4 ${
-                loading ? 'bg-hint' : 'bg-primary'
-              }`}
+              style={[styles.submitBtn, { backgroundColor: loading ? colors.hint : colors.primary }]}
               onPress={handleSubmit}
               disabled={loading}
               activeOpacity={0.85}
             >
-              <Text className="text-white text-base font-heading">
+              <Text style={styles.submitText}>
                 {loading ? 'Please wait…' : activeTab === 'signup' ? 'Create Account' : 'Log In'}
               </Text>
             </TouchableOpacity>
 
-            {/* Divider */}
-            <View className="flex-row items-center mb-4">
-              <View className="flex-1 h-px bg-border" />
-              <Text className="text-xs text-muted mx-3">or continue with</Text>
-              <View className="flex-1 h-px bg-border" />
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerLabel}>or continue with</Text>
+              <View style={styles.dividerLine} />
             </View>
 
-            {/* Social buttons */}
-            <View className="flex-row gap-3 mb-8">
-              <TouchableOpacity className="flex-1 flex-row items-center justify-center border border-border rounded-full py-3 bg-card gap-2">
-                <Ionicons name="logo-google" size={18} color="#1A1A1A" />
-                <Text className="text-sm font-body text-foreground">Google</Text>
+            <View style={styles.socialRow}>
+              <TouchableOpacity style={styles.socialBtn}>
+                <Ionicons name="logo-google" size={18} color={colors.foreground} />
+                <Text style={styles.socialText}>Google</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 flex-row items-center justify-center border border-border rounded-full py-3 bg-card gap-2">
-                <Ionicons name="logo-apple" size={18} color="#1A1A1A" />
-                <Text className="text-sm font-body text-foreground">Apple</Text>
+              <TouchableOpacity style={styles.socialBtn}>
+                <Ionicons name="logo-apple" size={18} color={colors.foreground} />
+                <Text style={styles.socialText}>Apple</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -234,3 +175,75 @@ export default function LoginScreen(): JSX.Element {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  flex1: { flex: 1 },
+  backBtn: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  body: { flex: 1, paddingHorizontal: 20, paddingTop: 24 },
+  brand: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 4 },
+  tagline: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, marginBottom: 32 },
+  tabRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F1EE',
+    borderRadius: radii.button,
+    padding: 4,
+    marginBottom: 32,
+  },
+  tab: { flex: 1, paddingVertical: 8, borderRadius: radii.button, alignItems: 'center' },
+  tabActive: { backgroundColor: colors.white },
+  tabText: { fontSize: fontSizes.sm },
+  tabTextActive: { color: colors.foreground, fontFamily: fonts.heading },
+  tabTextInactive: { color: colors.muted, fontFamily: fonts.body },
+  fieldGroup: { marginBottom: 16 },
+  fieldGroupLg: { marginBottom: 32 },
+  fieldLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginBottom: 4 },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.input,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: fontSizes.sm,
+    fontFamily: fonts.body,
+    color: colors.foreground,
+    backgroundColor: colors.card,
+  },
+  passwordRow: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.input,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    paddingHorizontal: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: fontSizes.sm,
+    fontFamily: fonts.body,
+    color: colors.foreground,
+  },
+  errorText: { fontSize: fontSizes.caption, color: colors.danger, marginTop: 4 },
+  hintText: { fontSize: fontSizes.caption, color: colors.hint, marginTop: 4 },
+  submitBtn: { width: '100%', borderRadius: radii.button, paddingVertical: 16, alignItems: 'center', marginBottom: 16 },
+  submitText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerLabel: { fontSize: fontSizes.caption, color: colors.muted, marginHorizontal: 12 },
+  socialRow: { flexDirection: 'row', gap: 12, marginBottom: 32 },
+  socialBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.button,
+    paddingVertical: 12,
+    backgroundColor: colors.card,
+    gap: 8,
+  },
+  socialText: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+});

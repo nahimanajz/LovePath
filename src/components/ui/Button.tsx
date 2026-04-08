@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { colors, fonts, fontSizes, radii } from '../../styles/theme';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
@@ -11,33 +12,8 @@ interface ButtonProps {
   size?: Size;
   disabled?: boolean;
   loading?: boolean;
-  className?: string;
+  style?: object;
 }
-
-const variantStyles: Record<Variant, { container: string; text: string }> = {
-  primary: {
-    container: 'bg-primary rounded-[50px]',
-    text: 'text-white font-body-medium',
-  },
-  secondary: {
-    container: 'bg-secondary rounded-[50px]',
-    text: 'text-white font-body-medium',
-  },
-  outline: {
-    container: 'border border-primary rounded-[50px] bg-transparent',
-    text: 'text-primary font-body-medium',
-  },
-  ghost: {
-    container: 'bg-transparent',
-    text: 'text-muted font-body-medium',
-  },
-};
-
-const sizeStyles: Record<Size, { container: string; text: string }> = {
-  sm: { container: 'py-2 px-4', text: 'text-sm' },
-  md: { container: 'py-3 px-6', text: 'text-base' },
-  lg: { container: 'py-4 px-8', text: 'text-lg' },
-};
 
 export function Button({
   label,
@@ -46,26 +22,57 @@ export function Button({
   size = 'md',
   disabled = false,
   loading = false,
-  className = '',
+  style,
 }: ButtonProps) {
-  const { container: variantContainer, text: variantText } = variantStyles[variant];
-  const { container: sizeContainer, text: sizeText } = sizeStyles[size];
-
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      className={`items-center justify-center ${variantContainer} ${sizeContainer} ${disabled || loading ? 'opacity-50' : ''} ${className}`}
+      style={[
+        styles.base,
+        styles[variant],
+        styles[size],
+        (disabled || loading) && styles.disabled,
+        style,
+      ]}
       activeOpacity={0.8}
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'outline' || variant === 'ghost' ? '#C0556A' : '#FFFFFF'}
+          color={variant === 'outline' || variant === 'ghost' ? colors.primary : colors.white}
           size="small"
         />
       ) : (
-        <Text className={`${variantText} ${sizeText}`}>{label}</Text>
+        <Text style={[styles.text, styles[`${variant}Text`], styles[`${size}Text`]]}>{label}</Text>
       )}
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  base: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radii.button,
+  },
+  disabled: { opacity: 0.5 },
+
+  primary: { backgroundColor: colors.primary },
+  secondary: { backgroundColor: colors.secondary },
+  outline: { borderWidth: 1, borderColor: colors.primary, backgroundColor: 'transparent' },
+  ghost: { backgroundColor: 'transparent' },
+
+  sm: { paddingVertical: 8, paddingHorizontal: 16 },
+  md: { paddingVertical: 12, paddingHorizontal: 24 },
+  lg: { paddingVertical: 16, paddingHorizontal: 32 },
+
+  text: { fontFamily: fonts.bodyMedium },
+  primaryText: { color: colors.white },
+  secondaryText: { color: colors.white },
+  outlineText: { color: colors.primary },
+  ghostText: { color: colors.muted },
+
+  smText: { fontSize: fontSizes.sm },
+  mdText: { fontSize: fontSizes.base },
+  lgText: { fontSize: fontSizes.lg },
+});

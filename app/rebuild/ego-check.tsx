@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -6,10 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSessionStore } from '../../src/store/session';
 import { egoService } from '../../src/services/egoChecks';
 import { LoadingScreen } from '../../src/components/ui/LoadingScreen';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 
 const EGO_PATTERNS = [
   'I need to feel loved before I give love',
-  'I feel diminished by my partner\'s success or praise from others',
+  "I feel diminished by my partner's success or praise from others",
   'I withhold warmth when I feel ignored or underappreciated',
   'I need acknowledgement to keep investing in the relationship',
   'I avoid apologising to protect my image',
@@ -29,15 +30,15 @@ function alertConfig(count: number): { label: string; body: string; color: strin
       label: 'Clear today',
       body: 'No ego patterns active. Keep this awareness through the day.',
       color: '#268947',
-      bg: '#E1F5EE',
+      bg: colors.tealTint,
     };
   }
   if (count <= 2) {
     return {
       label: 'Ego pattern detected',
       body: `${count} pattern${count > 1 ? 's' : ''} checked. Notice these without judgement — awareness is the first step.`,
-      color: '#EF9F27',
-      bg: '#FAEEDA',
+      color: colors.amber,
+      bg: colors.amberTint,
     };
   }
   if (count <= 4) {
@@ -51,8 +52,8 @@ function alertConfig(count: number): { label: string; body: string; color: strin
   return {
     label: 'Ego Critical',
     body: `${count} patterns active. Ego is critically blocking reconnection. This is the obstacle that cannot be avoided.`,
-    color: '#E24B4A',
-    bg: '#FDEAE8',
+    color: colors.danger,
+    bg: colors.roseTint,
   };
 }
 
@@ -87,93 +88,103 @@ export default function EgoCheckScreen(): JSX.Element {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-4 pb-2">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+          <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text className="flex-1 text-center text-sm font-heading text-primary">LovePath</Text>
-        <View className="w-6" />
+        <Text style={styles.headerTitle}>LovePath</Text>
+        <View style={styles.spacer} />
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* Title */}
-        <Text className="text-2xl font-heading text-foreground mt-4 mb-1">Ego Check</Text>
-        <Text className="text-sm font-body text-muted mb-5">
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Ego Check</Text>
+        <Text style={styles.subtitle}>
           Holiday and Beam both identify ego — not incompatibility — as the primary destroyer of deep love.
         </Text>
 
-        {/* Dynamic alert */}
-        <View
-          className="rounded-2xl p-4 mb-5"
-          style={{ backgroundColor: alert.bg }}
-        >
-          <View className="flex-row items-center mb-1">
+        <View style={[styles.alertCard, { backgroundColor: alert.bg }]}>
+          <View style={styles.alertHeader}>
             <Ionicons
               name={checkedCount === 0 ? 'checkmark-circle-outline' : 'warning-outline'}
               size={14}
               color={alert.color}
               style={{ marginRight: 6 }}
             />
-            <Text className="text-xs font-heading" style={{ color: alert.color }}>{alert.label}</Text>
+            <Text style={[styles.alertLabel, { color: alert.color }]}>{alert.label}</Text>
           </View>
-          <Text className="text-sm font-body text-foreground">{alert.body}</Text>
+          <Text style={styles.alertBody}>{alert.body}</Text>
         </View>
 
-        {/* Patterns list */}
-        <Text className="text-base font-heading text-foreground mb-3">
-          Check what applies to you right now
-        </Text>
-        <Text className="text-xs font-body text-muted mb-4">
-          Today only. Results are not shared with your partner.
-        </Text>
+        <Text style={styles.checkTitle}>Check what applies to you right now</Text>
+        <Text style={styles.checkSubtitle}>Today only. Results are not shared with your partner.</Text>
 
         {EGO_PATTERNS.map((pattern, idx) => {
           const checked = patterns[idx] ?? false;
           return (
             <TouchableOpacity
               key={idx}
-              className="flex-row items-start mb-4 bg-card rounded-xl p-4 border border-border"
+              style={styles.patternCard}
               onPress={() => handleToggle(idx)}
               activeOpacity={0.7}
             >
               <Ionicons
                 name={checked ? 'checkbox' : 'square-outline'}
                 size={20}
-                color={checked ? '#C0556A' : '#B4B2A9'}
+                color={checked ? colors.primary : colors.hint}
                 style={{ marginRight: 12, marginTop: 1 }}
               />
-              <Text
-                className={`flex-1 text-sm font-body ${checked ? 'text-muted line-through' : 'text-foreground'}`}
-              >
+              <Text style={[styles.patternText, checked && styles.patternChecked]}>
                 {pattern}
               </Text>
             </TouchableOpacity>
           );
         })}
 
-        {/* Affirmation card */}
         {checkedCount > 0 && (
-          <View className="bg-rose-tint rounded-2xl p-4 mb-6 mt-2">
-            <Text className="text-xs font-heading text-primary mb-2">Reflect on this</Text>
-            <Text className="text-sm font-body text-foreground leading-5 italic">{AFFIRMATION}</Text>
+          <View style={styles.affirmCard}>
+            <Text style={styles.affirmTitle}>Reflect on this</Text>
+            <Text style={styles.affirmText}>{AFFIRMATION}</Text>
           </View>
         )}
 
-        <View className="h-4" />
+        <View style={{ height: 16 }} />
       </ScrollView>
 
-      {/* CTAs */}
-      <View className="px-5 pb-6 gap-3">
+      <View style={styles.footer}>
         <TouchableOpacity
-          className="w-full bg-primary rounded-full py-4 items-center"
+          style={styles.ctaBtn}
           onPress={() => router.push('/(tabs)/obstacles')}
           activeOpacity={0.85}
         >
-          <Text className="text-white text-base font-heading">How to work through ego →</Text>
+          <Text style={styles.ctaText}>How to work through ego →</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  spacer: { width: 24 },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  title: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.foreground, marginTop: 16, marginBottom: 4 },
+  subtitle: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, marginBottom: 20 },
+  alertCard: { borderRadius: radii.xl2, padding: 16, marginBottom: 20 },
+  alertHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  alertLabel: { fontSize: fontSizes.caption, fontFamily: fonts.heading },
+  alertBody: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+  checkTitle: { fontSize: fontSizes.base, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 12 },
+  checkSubtitle: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginBottom: 16 },
+  patternCard: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16, backgroundColor: colors.card, borderRadius: radii.xl, padding: 16, borderWidth: 1, borderColor: colors.border },
+  patternText: { flex: 1, fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+  patternChecked: { color: colors.muted, textDecorationLine: 'line-through' },
+  affirmCard: { backgroundColor: colors.roseTint, borderRadius: radii.xl2, padding: 16, marginBottom: 24, marginTop: 8 },
+  affirmTitle: { fontSize: fontSizes.caption, fontFamily: fonts.heading, color: colors.primary, marginBottom: 8 },
+  affirmText: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground, lineHeight: 20, fontStyle: 'italic' },
+  footer: { paddingHorizontal: 20, paddingBottom: 24 },
+  ctaBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, alignItems: 'center' },
+  ctaText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+});

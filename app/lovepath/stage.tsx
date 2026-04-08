@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -9,13 +9,14 @@ import { lovepathService } from '../../src/services/lovepath';
 import { LOVEPATH_STAGES } from '../../src/constants/lovepathStages';
 import { LoadingScreen } from '../../src/components/ui/LoadingScreen';
 import { ErrorScreen } from '../../src/components/ui/ErrorScreen';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 import type { LovepathStage, LovepathStageRecord } from '../../src/types';
 
 const STAGE_COLORS: Record<LovepathStage, { bg: string; text: string; border: string }> = {
-  Attraction:  { bg: '#FDE8EC', text: '#C0556A', border: '#C0556A' },
-  Acceptance:  { bg: '#EEEDFE', text: '#7F77DD', border: '#7F77DD' },
-  Attachment:  { bg: '#E1F5EE', text: '#268947', border: '#268947' },
-  Aspiration:  { bg: '#FAEEDA', text: '#EF9F27', border: '#EF9F27' },
+  Attraction: { bg: colors.roseTint,   text: colors.primary,   border: colors.primary },
+  Acceptance: { bg: colors.purpleTint, text: colors.secondary, border: colors.secondary },
+  Attachment: { bg: colors.tealTint,   text: '#268947',        border: '#268947' },
+  Aspiration: { bg: colors.amberTint,  text: colors.amber,     border: colors.amber },
 };
 
 const STAGE_ORDER: LovepathStage[] = ['Attraction', 'Acceptance', 'Attachment', 'Aspiration'];
@@ -24,14 +25,10 @@ export default function StageTrackerScreen(): JSX.Element {
   const userId = useSessionStore((s) => s.userId) ?? 1;
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['lovepath', userId],
-    queryFn: () => lovepathService.getByUser(userId),
-  });
+  const { data, isLoading, error, refetch } = useQuery({ queryKey: ['lovepath', userId], queryFn: () => lovepathService.getByUser(userId) });
 
   const mutation = useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: Partial<LovepathStageRecord> }) =>
-      lovepathService.update(id, payload),
+    mutationFn: ({ id, payload }: { id: number; payload: Partial<LovepathStageRecord> }) => lovepathService.update(id, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lovepath', userId] }),
   });
 
@@ -46,15 +43,12 @@ export default function StageTrackerScreen(): JSX.Element {
   const currentChecklist: boolean[] = checklist[currentStage] ?? [false, false, false, false, false];
   const checkedCount = currentChecklist.filter(Boolean).length;
   const stageDef = LOVEPATH_STAGES.find((s) => s.stage === currentStage);
-  const colors = STAGE_COLORS[currentStage];
+  const colors_ = STAGE_COLORS[currentStage];
 
   function handleToggle(idx: number): void {
     const next = [...currentChecklist];
     next[idx] = !next[idx];
-    mutation.mutate({
-      id: record.id,
-      payload: { checklist: { ...checklist, [currentStage]: next } },
-    });
+    mutation.mutate({ id: record.id, payload: { checklist: { ...checklist, [currentStage]: next } } });
   }
 
   function handleStageChange(stage: LovepathStage): void {
@@ -63,81 +57,52 @@ export default function StageTrackerScreen(): JSX.Element {
 
   function handleCTA(): void {
     if (checkedCount < 3) {
-      router.push('/obstacles');
+      router.push('/(tabs)/obstacles');
     } else {
       const nextIdx = currentStageIndex + 1;
       if (nextIdx < STAGE_ORDER.length) {
-        Alert.alert(
-          'Advance Stage?',
-          `Move to ${STAGE_ORDER[nextIdx]}?`,
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Advance',
-              onPress: () => handleStageChange(STAGE_ORDER[nextIdx]),
-            },
-          ],
-        );
+        Alert.alert('Advance Stage?', `Move to ${STAGE_ORDER[nextIdx]}?`, [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Advance', onPress: () => handleStageChange(STAGE_ORDER[nextIdx]) },
+        ]);
       }
     }
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-4 pb-2">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+          <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text className="flex-1 text-center text-sm font-heading text-primary">LovePath</Text>
-        <View className="w-6" />
+        <Text style={styles.headerTitle}>LovePath</Text>
+        <View style={styles.spacer} />
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        <Text className="text-2xl font-heading text-foreground mt-4 mb-1">Milestone Tracker</Text>
-        <Text className="text-sm font-body text-muted mb-6">
-          Track your journey through Beam's four LovePath stages.
-        </Text>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Milestone Tracker</Text>
+        <Text style={styles.subtitle}>Track your journey through Beam's four LovePath stages.</Text>
 
-        {/* Timeline */}
-        <View className="mb-6">
+        <View style={styles.timelineBlock}>
           {STAGE_ORDER.map((stage, idx) => {
             const isActive = stage === currentStage;
             const isPast = idx < currentStageIndex;
             const c = STAGE_COLORS[stage];
             return (
-              <TouchableOpacity
-                key={stage}
-                className="flex-row items-center mb-3"
-                onPress={() => handleStageChange(stage)}
-                activeOpacity={0.7}
-              >
-                {/* Timeline node */}
-                <View className="items-center mr-3">
-                  <View
-                    className="w-8 h-8 rounded-full border-2 items-center justify-center"
-                    style={{
-                      backgroundColor: isActive || isPast ? c.bg : '#F1F1EE',
-                      borderColor: isActive ? c.border : isPast ? c.border : '#E8E6E0',
-                    }}
-                  >
+              <TouchableOpacity key={stage} style={styles.timelineRow} onPress={() => handleStageChange(stage)} activeOpacity={0.7}>
+                <View style={styles.timelineNodeCol}>
+                  <View style={[styles.timelineNode, { backgroundColor: isActive || isPast ? c.bg : '#F1F1EE', borderColor: isActive ? c.border : isPast ? c.border : colors.border }]}>
                     {isPast ? (
                       <Ionicons name="checkmark" size={14} color={c.text} />
                     ) : isActive ? (
-                      <View className="w-2 h-2 rounded-full" style={{ backgroundColor: c.text }} />
+                      <View style={[styles.nodeDot, { backgroundColor: c.text }]} />
                     ) : (
-                      <View className="w-2 h-2 rounded-full bg-hint" />
+                      <View style={[styles.nodeDot, { backgroundColor: colors.hint }]} />
                     )}
                   </View>
-                  {idx < STAGE_ORDER.length - 1 && (
-                    <View className="w-0.5 h-4 bg-border mt-1" />
-                  )}
+                  {idx < STAGE_ORDER.length - 1 && <View style={styles.timelineLine} />}
                 </View>
-                {/* Stage label */}
-                <Text
-                  className={`text-sm ${isActive ? 'font-heading' : 'font-body'}`}
-                  style={{ color: isActive ? c.text : '#888780' }}
-                >
+                <Text style={[styles.stageLabel, { color: isActive ? c.text : colors.muted, fontFamily: isActive ? fonts.heading : fonts.body }]}>
                   {stage}
                 </Text>
               </TouchableOpacity>
@@ -145,86 +110,83 @@ export default function StageTrackerScreen(): JSX.Element {
           })}
         </View>
 
-        {/* Active stage card */}
         {stageDef && (
-          <View
-            className="rounded-2xl p-5 mb-4"
-            style={{ backgroundColor: colors.bg }}
-          >
-            <View className="flex-row items-center mb-2">
-              <View
-                className="px-3 py-1 rounded-full mr-2"
-                style={{ backgroundColor: colors.text }}
-              >
-                <Text className="text-xs font-heading text-white">{currentStage}</Text>
+          <View style={[styles.stageCard, { backgroundColor: colors_.bg }]}>
+            <View style={styles.stageCardHeader}>
+              <View style={[styles.stagePill, { backgroundColor: colors_.text }]}>
+                <Text style={styles.stagePillText}>{currentStage}</Text>
               </View>
             </View>
-            <Text className="text-sm font-body text-foreground mb-3">{stageDef.description}</Text>
+            <Text style={styles.stageDesc}>{stageDef.description}</Text>
 
-            {/* Warning sign */}
             {checkedCount < 2 && (
-              <View className="flex-row items-start mb-3 bg-white/50 rounded-xl p-3">
-                <Ionicons name="warning-outline" size={14} color="#EF9F27" style={{ marginRight: 6, marginTop: 1 }} />
-                <Text className="flex-1 text-xs font-body text-foreground">{stageDef.warningSign}</Text>
+              <View style={styles.warningBox}>
+                <Ionicons name="warning-outline" size={14} color={colors.amber} style={{ marginRight: 6, marginTop: 1 }} />
+                <Text style={styles.warningText}>{stageDef.warningSign}</Text>
               </View>
             )}
 
-            {/* Checklist */}
-            <Text className="text-sm font-heading text-foreground mb-3">
-              Check off what's true right now
-            </Text>
+            <Text style={styles.checklistTitle}>Check off what's true right now</Text>
             {stageDef.checklist.map((item, idx) => {
               const checked = currentChecklist[idx] ?? false;
               return (
-                <TouchableOpacity
-                  key={idx}
-                  className="flex-row items-start mb-2"
-                  onPress={() => handleToggle(idx)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons
-                    name={checked ? 'checkbox' : 'square-outline'}
-                    size={18}
-                    color={checked ? colors.text : '#B4B2A9'}
-                    style={{ marginRight: 8, marginTop: 1 }}
-                  />
-                  <Text
-                    className={`flex-1 text-sm font-body ${checked ? 'line-through text-muted' : 'text-foreground'}`}
-                  >
-                    {item}
-                  </Text>
+                <TouchableOpacity key={idx} style={styles.checklistRow} onPress={() => handleToggle(idx)} activeOpacity={0.7}>
+                  <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={18} color={checked ? colors_.text : colors.hint} style={{ marginRight: 8, marginTop: 1 }} />
+                  <Text style={[styles.checklistText, checked && styles.checklistChecked]}>{item}</Text>
                 </TouchableOpacity>
               );
             })}
 
-            {/* Progress */}
-            <View className="mt-3">
-              <View className="flex-row justify-between mb-1">
-                <Text className="text-xs font-body text-muted">{checkedCount}/5 completed</Text>
-              </View>
-              <View className="h-1.5 rounded-full bg-white/60">
-                <View
-                  className="h-1.5 rounded-full"
-                  style={{ width: `${(checkedCount / 5) * 100}%`, backgroundColor: colors.text }}
-                />
+            <View style={styles.progressBlock}>
+              <Text style={styles.progressLabel}>{checkedCount}/5 completed</Text>
+              <View style={[styles.progressTrack, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
+                <View style={[styles.progressFill, { width: `${(checkedCount / 5) * 100}%`, backgroundColor: colors_.text }]} />
               </View>
             </View>
           </View>
         )}
       </ScrollView>
 
-      {/* CTA */}
-      <View className="px-5 pb-6">
-        <TouchableOpacity
-          className="w-full bg-primary rounded-full py-4 items-center"
-          onPress={handleCTA}
-          activeOpacity={0.85}
-        >
-          <Text className="text-white text-base font-heading">
-            {checkedCount < 3 ? "What's blocking this stage?" : 'View next stage'}
-          </Text>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.ctaBtn} onPress={handleCTA} activeOpacity={0.85}>
+          <Text style={styles.ctaText}>{checkedCount < 3 ? "What's blocking this stage?" : 'View next stage'}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  spacer: { width: 24 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  title: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.foreground, marginTop: 16, marginBottom: 4 },
+  subtitle: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, marginBottom: 24 },
+  timelineBlock: { marginBottom: 24 },
+  timelineRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  timelineNodeCol: { alignItems: 'center', marginRight: 12 },
+  timelineNode: { width: 32, height: 32, borderRadius: radii.full, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  nodeDot: { width: 8, height: 8, borderRadius: radii.full },
+  timelineLine: { width: 2, height: 16, backgroundColor: colors.border, marginTop: 4 },
+  stageLabel: { fontSize: fontSizes.sm },
+  stageCard: { borderRadius: radii.xl2, padding: 20, marginBottom: 16 },
+  stageCardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  stagePill: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: radii.full },
+  stagePillText: { fontSize: fontSizes.caption, fontFamily: fonts.heading, color: colors.white },
+  stageDesc: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground, marginBottom: 12 },
+  warningBox: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: radii.xl, padding: 12 },
+  warningText: { flex: 1, fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.foreground },
+  checklistTitle: { fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 12 },
+  checklistRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 },
+  checklistText: { flex: 1, fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+  checklistChecked: { textDecorationLine: 'line-through', color: colors.muted },
+  progressBlock: { marginTop: 12 },
+  progressLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginBottom: 4 },
+  progressTrack: { height: 6, borderRadius: radii.full },
+  progressFill: { height: 6, borderRadius: radii.full },
+  footer: { paddingHorizontal: 20, paddingBottom: 24 },
+  ctaBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, alignItems: 'center' },
+  ctaText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+});

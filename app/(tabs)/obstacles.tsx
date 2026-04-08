@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -8,15 +8,16 @@ import { useSessionStore } from '../../src/store/session';
 import { OBSTACLES } from '../../src/constants/obstacleGuide';
 import { LoadingScreen } from '../../src/components/ui/LoadingScreen';
 import { apiFetch, API } from '../../src/config/api';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 import type { ObstaclePhase, ObstacleRecord } from '../../src/types';
 
 type FilterTab = 'All' | ObstaclePhase;
 const TABS: FilterTab[] = ['All', 'Perception', 'Action', 'Will'];
 
-const PHASE_STYLES: Record<ObstaclePhase, { bg: string; text: string }> = {
-  Perception: { bg: '#EEEDFE', text: '#7F77DD' },
-  Action:     { bg: '#E1F5EE', text: '#268947' },
-  Will:       { bg: '#FDE8EC', text: '#C0556A' },
+const PHASE_COLORS: Record<ObstaclePhase, { bg: string; text: string }> = {
+  Perception: { bg: colors.purpleTint, text: colors.secondary },
+  Action:     { bg: colors.tealTint,   text: '#268947' },
+  Will:       { bg: colors.roseTint,   text: colors.primary },
 };
 
 function todayKey(): string {
@@ -32,23 +33,15 @@ export default function ObstaclesScreen(): JSX.Element {
 
   const { data: records, isLoading } = useQuery({
     queryKey: ['obstacleRecords', userId, today],
-    queryFn: () =>
-      apiFetch<ObstacleRecord[]>(`${API.obstacles}?userId=${userId}&date=${today}`),
+    queryFn: () => apiFetch<ObstacleRecord[]>(`${API.obstacles}?userId=${userId}&date=${today}`),
   });
 
   const mutation = useMutation({
     mutationFn: (r: Omit<ObstacleRecord, 'id'> & { id?: number }) =>
       r.id
-        ? apiFetch<ObstacleRecord>(`${API.obstacles}/${r.id}`, {
-            method: 'PUT',
-            body: JSON.stringify(r),
-          })
-        : apiFetch<ObstacleRecord>(API.obstacles, {
-            method: 'POST',
-            body: JSON.stringify(r),
-          }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['obstacleRecords', userId, today] }),
+        ? apiFetch<ObstacleRecord>(`${API.obstacles}/${r.id}`, { method: 'PUT', body: JSON.stringify(r) })
+        : apiFetch<ObstacleRecord>(API.obstacles, { method: 'POST', body: JSON.stringify(r) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['obstacleRecords', userId, today] }),
   });
 
   if (isLoading) return <LoadingScreen />;
@@ -63,138 +56,80 @@ export default function ObstaclesScreen(): JSX.Element {
   function handleToggle(obstacleId: number, practiceIdx: number): void {
     const key = practiceKey(obstacleId, practiceIdx);
     const next = { ...practices, [key]: !practices[key] };
-    mutation.mutate({
-      userId,
-      date: today,
-      practices: next,
-      ...(record?.id ? { id: record.id } : {}),
-    } as ObstacleRecord & { id?: number });
+    mutation.mutate({ userId, date: today, practices: next, ...(record?.id ? { id: record.id } : {}) } as ObstacleRecord & { id?: number });
   }
 
   function checkedCount(obstacleId: number): number {
     return OBSTACLES.find((o) => o.id === obstacleId)?.practices.reduce(
-      (count, _, idx) => count + (practices[practiceKey(obstacleId, idx)] ? 1 : 0),
-      0,
+      (count, _, idx) => count + (practices[practiceKey(obstacleId, idx)] ? 1 : 0), 0,
     ) ?? 0;
   }
 
   const totalCompleted = OBSTACLES.reduce((sum, o) => sum + checkedCount(o.id), 0);
-
-  const filtered = activeTab === 'All'
-    ? OBSTACLES
-    : OBSTACLES.filter((o) => o.phase === activeTab);
+  const filtered = activeTab === 'All' ? OBSTACLES : OBSTACLES.filter((o) => o.phase === activeTab);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-4 pb-2">
-        <View className="w-6" />
-        <Text className="flex-1 text-center text-sm font-heading text-primary">LovePath</Text>
-        <View className="w-6" />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.spacer} />
+        <Text style={styles.headerTitle}>LovePath</Text>
+        <View style={styles.spacer} />
       </View>
 
-      {/* Title */}
-      <View className="px-5 mt-2 mb-4">
-        <Text className="text-2xl font-heading text-foreground mb-1">Obstacle Guide</Text>
-        <Text className="text-sm font-body text-muted">
-          Ryan Holiday's Stoic framework for love's hardships.
-        </Text>
+      <View style={styles.titleBlock}>
+        <Text style={styles.title}>Obstacle Guide</Text>
+        <Text style={styles.subtitle}>Ryan Holiday's Stoic framework for love's hardships.</Text>
       </View>
 
-      {/* Filter tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="px-5 mb-4 flex-none"
-        contentContainerStyle={{ gap: 8 }}
-      >
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={{ gap: 8 }}>
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab}
             onPress={() => setActiveTab(tab)}
-            className="px-4 py-1.5 rounded-full border"
-            style={{
-              backgroundColor: activeTab === tab ? '#C0556A' : 'transparent',
-              borderColor: activeTab === tab ? '#C0556A' : '#E8E6E0',
-            }}
+            style={[
+              styles.filterTab,
+              { backgroundColor: activeTab === tab ? colors.primary : 'transparent', borderColor: activeTab === tab ? colors.primary : colors.border },
+            ]}
           >
-            <Text
-              className="text-sm font-body"
-              style={{ color: activeTab === tab ? '#FFF' : '#888780' }}
-            >
-              {tab}
-            </Text>
+            <Text style={[styles.filterTabText, { color: activeTab === tab ? colors.white : colors.muted }]}>{tab}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         {filtered.map((obstacle) => {
           const isExpanded = expandedId === obstacle.id;
-          const ps = PHASE_STYLES[obstacle.phase];
+          const ps = PHASE_COLORS[obstacle.phase];
           const checked = checkedCount(obstacle.id);
           const total = obstacle.practices.length;
 
           return (
-            <View key={obstacle.id} className="bg-card rounded-2xl mb-3 border border-border overflow-hidden">
-              {/* Card header */}
-              <TouchableOpacity
-                className="p-4"
-                onPress={() => setExpandedId(isExpanded ? null : obstacle.id)}
-                activeOpacity={0.7}
-              >
-                <View className="flex-row items-center justify-between mb-2">
-                  <View
-                    className="px-2 py-0.5 rounded-full"
-                    style={{ backgroundColor: ps.bg }}
-                  >
-                    <Text className="text-xs font-heading" style={{ color: ps.text }}>
-                      {obstacle.phase.toUpperCase()}
-                    </Text>
+            <View key={obstacle.id} style={styles.card}>
+              <TouchableOpacity style={styles.cardHeader} onPress={() => setExpandedId(isExpanded ? null : obstacle.id)} activeOpacity={0.7}>
+                <View style={styles.cardHeaderRow}>
+                  <View style={[styles.phasePill, { backgroundColor: ps.bg }]}>
+                    <Text style={[styles.phaseText, { color: ps.text }]}>{obstacle.phase.toUpperCase()}</Text>
                   </View>
-                  <View className="flex-row items-center gap-2">
-                    <Text className="text-xs font-body text-muted">{checked}/{total}</Text>
-                    <Ionicons
-                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                      size={16}
-                      color="#888780"
-                    />
+                  <View style={styles.countRow}>
+                    <Text style={styles.countText}>{checked}/{total}</Text>
+                    <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={colors.muted} />
                   </View>
                 </View>
-                <Text className="text-base font-heading text-foreground">{obstacle.title}</Text>
+                <Text style={styles.cardTitle}>{obstacle.title}</Text>
               </TouchableOpacity>
 
-              {/* Expanded content */}
               {isExpanded && (
-                <View className="px-4 pb-4">
-                  <View className="h-px bg-border mb-4" />
-                  <Text className="text-sm font-body text-foreground leading-5 mb-4 italic">
-                    {obstacle.insight}
-                  </Text>
-                  <Text className="text-xs font-heading text-foreground mb-3">Today's practices</Text>
+                <View style={styles.cardBody}>
+                  <View style={styles.divider} />
+                  <Text style={styles.insightText}>{obstacle.insight}</Text>
+                  <Text style={styles.practicesLabel}>Today's practices</Text>
                   {obstacle.practices.map((practice, idx) => {
                     const key = practiceKey(obstacle.id, idx);
                     const isChecked = practices[key] ?? false;
                     return (
-                      <TouchableOpacity
-                        key={idx}
-                        className="flex-row items-start mb-3"
-                        onPress={() => handleToggle(obstacle.id, idx)}
-                        activeOpacity={0.7}
-                      >
-                        <Ionicons
-                          name={isChecked ? 'checkbox' : 'square-outline'}
-                          size={18}
-                          color={isChecked ? '#C0556A' : '#B4B2A9'}
-                          style={{ marginRight: 10, marginTop: 1 }}
-                        />
-                        <Text
-                          className={`flex-1 text-sm font-body ${
-                            isChecked ? 'line-through text-muted' : 'text-foreground'
-                          }`}
-                        >
-                          {practice.text}
-                        </Text>
+                      <TouchableOpacity key={idx} style={styles.practiceRow} onPress={() => handleToggle(obstacle.id, idx)} activeOpacity={0.7}>
+                        <Ionicons name={isChecked ? 'checkbox' : 'square-outline'} size={18} color={isChecked ? colors.primary : colors.hint} style={{ marginRight: 10, marginTop: 1 }} />
+                        <Text style={[styles.practiceText, isChecked && styles.practiceChecked]}>{practice.text}</Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -203,27 +138,50 @@ export default function ObstaclesScreen(): JSX.Element {
             </View>
           );
         })}
-
-        <View className="h-4" />
+        <View style={{ height: 16 }} />
       </ScrollView>
 
-      {/* Footer CTA */}
-      <View className="px-5 pb-6">
+      <View style={styles.footer}>
         {totalCompleted > 0 && (
-          <Text className="text-center text-xs font-body text-muted mb-3">
-            {totalCompleted} practice{totalCompleted !== 1 ? 's' : ''} completed today
-          </Text>
+          <Text style={styles.completedLabel}>{totalCompleted} practice{totalCompleted !== 1 ? 's' : ''} completed today</Text>
         )}
-        <TouchableOpacity
-          className="w-full bg-primary rounded-full py-4 items-center"
-          onPress={() => router.push('/practices/today')}
-          activeOpacity={0.85}
-        >
-          <Text className="text-white text-base font-heading">
-            View today's completed practices
-          </Text>
+        <TouchableOpacity style={styles.ctaBtn} onPress={() => router.push('/practices/today')} activeOpacity={0.85}>
+          <Text style={styles.ctaText}>View today's completed practices</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  spacer: { width: 24 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  titleBlock: { paddingHorizontal: 20, marginTop: 8, marginBottom: 16 },
+  title: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 4 },
+  subtitle: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted },
+  filterScroll: { paddingHorizontal: 20, marginBottom: 16, flexGrow: 0 },
+  filterTab: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: radii.full, borderWidth: 1 },
+  filterTabText: { fontSize: fontSizes.sm, fontFamily: fonts.body },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  card: { backgroundColor: colors.card, borderRadius: radii.xl2, marginBottom: 12, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  cardHeader: { padding: 16 },
+  cardHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  phasePill: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: radii.full },
+  phaseText: { fontSize: fontSizes.caption, fontFamily: fonts.heading },
+  countRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  countText: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted },
+  cardTitle: { fontSize: fontSizes.base, fontFamily: fonts.heading, color: colors.foreground },
+  cardBody: { paddingHorizontal: 16, paddingBottom: 16 },
+  divider: { height: 1, backgroundColor: colors.border, marginBottom: 16 },
+  insightText: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground, lineHeight: 20, marginBottom: 16, fontStyle: 'italic' },
+  practicesLabel: { fontSize: fontSizes.caption, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 12 },
+  practiceRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
+  practiceText: { flex: 1, fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+  practiceChecked: { textDecorationLine: 'line-through', color: colors.muted },
+  footer: { paddingHorizontal: 20, paddingBottom: 24 },
+  completedLabel: { textAlign: 'center', fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginBottom: 12 },
+  ctaBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, alignItems: 'center' },
+  ctaText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+});

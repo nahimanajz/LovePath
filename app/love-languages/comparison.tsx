@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -8,16 +8,13 @@ import { usersService } from '../../src/services/users';
 import { quizService } from '../../src/services/quizResults';
 import { LANGUAGE_LABELS } from '../../src/types';
 import { LoadingScreen } from '../../src/components/ui/LoadingScreen';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 import type { LanguageKey, LanguageScores } from '../../src/types';
 
 const LANGUAGE_ORDER: LanguageKey[] = ['WA', 'QT', 'RG', 'AS', 'PT'];
 
 const LANGUAGE_COLORS: Record<LanguageKey, string> = {
-  WA: '#C0556A',
-  QT: '#7F77DD',
-  RG: '#268947',
-  AS: '#EF9F27',
-  PT: '#E24B4A',
+  WA: colors.primary, QT: colors.secondary, RG: '#268947', AS: colors.amber, PT: colors.danger,
 };
 
 function computeMatch(a: LanguageScores, b: LanguageScores, primaryA: LanguageKey, primaryB: LanguageKey): number {
@@ -27,24 +24,14 @@ function computeMatch(a: LanguageScores, b: LanguageScores, primaryA: LanguageKe
 
 function matchColor(pct: number): string {
   if (pct >= 80) return '#268947';
-  if (pct >= 50) return '#EF9F27';
-  return '#E24B4A';
+  if (pct >= 50) return colors.amber;
+  return colors.danger;
 }
 
-interface AvatarProps {
-  name: string;
-  size?: number;
-}
-
-function Avatar({ name, size = 48 }: AvatarProps): JSX.Element {
+function Avatar({ name, size = 48 }: { name: string; size?: number }): JSX.Element {
   return (
-    <View
-      className="rounded-full bg-rose-tint items-center justify-center"
-      style={{ width: size, height: size }}
-    >
-      <Text className="font-heading text-primary" style={{ fontSize: size * 0.4 }}>
-        {name.charAt(0).toUpperCase()}
-      </Text>
+    <View style={[styles.avatarCircle, { width: size, height: size }]}>
+      <Text style={[styles.avatarText, { fontSize: size * 0.4, color: colors.primary }]}>{name.charAt(0).toUpperCase()}</Text>
     </View>
   );
 }
@@ -52,30 +39,14 @@ function Avatar({ name, size = 48 }: AvatarProps): JSX.Element {
 export default function ComparisonScreen(): JSX.Element {
   const userId = useSessionStore((s) => s.userId) ?? 1;
 
-  const userQuery = useQuery({
-    queryKey: ['user', userId],
-    queryFn: () => usersService.getById(userId),
-  });
-
-  const quizQuery = useQuery({
-    queryKey: ['quizResults', userId],
-    queryFn: () => quizService.getByUser(userId),
-  });
+  const userQuery = useQuery({ queryKey: ['user', userId], queryFn: () => usersService.getById(userId) });
+  const quizQuery = useQuery({ queryKey: ['quizResults', userId], queryFn: () => quizService.getByUser(userId) });
 
   const user = userQuery.data;
   const partnerId = user?.partnerId;
 
-  const partnerQuery = useQuery({
-    queryKey: ['user', partnerId],
-    queryFn: () => usersService.getById(partnerId!),
-    enabled: !!partnerId,
-  });
-
-  const partnerQuizQuery = useQuery({
-    queryKey: ['quizResults', partnerId],
-    queryFn: () => quizService.getByUser(partnerId!),
-    enabled: !!partnerId,
-  });
+  const partnerQuery = useQuery({ queryKey: ['user', partnerId], queryFn: () => usersService.getById(partnerId!), enabled: !!partnerId });
+  const partnerQuizQuery = useQuery({ queryKey: ['quizResults', partnerId], queryFn: () => quizService.getByUser(partnerId!), enabled: !!partnerId });
 
   if (userQuery.isLoading || quizQuery.isLoading) return <LoadingScreen />;
 
@@ -83,154 +54,101 @@ export default function ComparisonScreen(): JSX.Element {
   const partner = partnerQuery.data;
   const partnerQuiz = partnerQuizQuery.data?.[0];
 
-  // No partner connected
   if (!partnerId) {
     return (
-      <SafeAreaView className="flex-1 bg-background items-center justify-center px-5">
-        <Ionicons name="people-outline" size={48} color="#B4B2A9" />
-        <Text className="text-lg font-heading text-foreground mt-4 mb-2">No partner connected</Text>
-        <Text className="text-sm font-body text-muted text-center mb-6">
-          Invite your partner to compare your Love Languages.
-        </Text>
-        <TouchableOpacity
-          className="bg-primary rounded-full py-3 px-6"
-          onPress={() => router.push('/partner/invite')}
-        >
-          <Text className="text-white text-sm font-heading">Invite Partner</Text>
+      <SafeAreaView style={styles.emptyContainer}>
+        <Ionicons name="people-outline" size={48} color={colors.hint} />
+        <Text style={styles.emptyTitle}>No partner connected</Text>
+        <Text style={styles.emptyBody}>Invite your partner to compare your Love Languages.</Text>
+        <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/partner/invite')}>
+          <Text style={styles.emptyBtnText}>Invite Partner</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  // Partner hasn't taken quiz
   if (!partnerQuiz) {
     return (
-      <SafeAreaView className="flex-1 bg-background items-center justify-center px-5">
-        <Ionicons name="time-outline" size={48} color="#B4B2A9" />
-        <Text className="text-lg font-heading text-foreground mt-4 mb-2">
-          {partner?.name ?? 'Your partner'} hasn't taken the quiz yet
-        </Text>
-        <TouchableOpacity
-          className="mt-4 border border-primary rounded-full py-3 px-6 flex-row items-center"
-          onPress={() => router.push('/partner/invite')}
-        >
-          <Text className="text-primary text-sm font-heading mr-1">Send reminder</Text>
-          <Ionicons name="arrow-forward" size={14} color="#C0556A" />
+      <SafeAreaView style={styles.emptyContainer}>
+        <Ionicons name="time-outline" size={48} color={colors.hint} />
+        <Text style={styles.emptyTitle}>{partner?.name ?? 'Your partner'} hasn't taken the quiz yet</Text>
+        <TouchableOpacity style={styles.outlineBtn} onPress={() => router.push('/partner/invite')}>
+          <Text style={styles.outlineBtnText}>Send reminder</Text>
+          <Ionicons name="arrow-forward" size={14} color={colors.primary} />
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  const matchPct = myQuiz
-    ? computeMatch(myQuiz.scores, partnerQuiz.scores, myQuiz.primary, partnerQuiz.primary)
-    : 0;
+  const matchPct = myQuiz ? computeMatch(myQuiz.scores, partnerQuiz.scores, myQuiz.primary, partnerQuiz.primary) : 0;
   const mColor = matchColor(matchPct);
-  const maxScore = 12; // max possible score for any language
+  const maxScore = 12;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-4 pb-2">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+          <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text className="flex-1 text-center text-sm font-heading text-primary">LovePath</Text>
+        <Text style={styles.headerTitle}>LovePath</Text>
         <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="share-outline" size={22} color="#888780" />
+          <Ionicons name="share-outline" size={22} color={colors.muted} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* Avatars */}
-        <View className="flex-row items-center justify-center mt-4 mb-6 gap-8">
-          <View className="items-center">
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.avatarsRow}>
+          <View style={styles.avatarItem}>
             <Avatar name={user?.name ?? 'A'} size={56} />
-            <Text className="text-xs font-body text-foreground mt-1">{user?.name ?? 'You'}</Text>
-            <Text className="text-[10px] font-body text-muted">
-              {myQuiz ? LANGUAGE_LABELS[myQuiz.primary] : '—'}
-            </Text>
+            <Text style={styles.avatarName}>{user?.name ?? 'You'}</Text>
+            <Text style={styles.avatarLang}>{myQuiz ? LANGUAGE_LABELS[myQuiz.primary] : '—'}</Text>
           </View>
-          <View className="items-center">
-            <View className="w-14 h-14 rounded-full bg-purple-tint items-center justify-center">
-              <Text className="font-heading text-secondary text-2xl">
-                {partner?.name?.charAt(0) ?? 'J'}
-              </Text>
+          <View style={styles.avatarItem}>
+            <View style={[styles.partnerCircle, { width: 56, height: 56 }]}>
+              <Text style={styles.partnerInitial}>{partner?.name?.charAt(0) ?? 'J'}</Text>
             </View>
-            <Text className="text-xs font-body text-foreground mt-1">{partner?.name ?? 'Partner'}</Text>
-            <Text className="text-[10px] font-body text-muted">
-              {LANGUAGE_LABELS[partnerQuiz.primary]}
-            </Text>
+            <Text style={styles.avatarName}>{partner?.name ?? 'Partner'}</Text>
+            <Text style={styles.avatarLang}>{LANGUAGE_LABELS[partnerQuiz.primary]}</Text>
           </View>
         </View>
 
-        {/* Compatibility Score */}
-        <View className="items-center mb-8">
-          <Text className="text-xs font-body text-muted tracking-widest uppercase mb-1">
-            Compatibility Score
-          </Text>
-          <View className="flex-row items-center">
-            <Text className="font-heading text-5xl" style={{ color: mColor }}>
-              {matchPct}%
-            </Text>
+        <View style={styles.scoreBlock}>
+          <Text style={styles.scoreLabel}>Compatibility Score</Text>
+          <View style={styles.scoreRow}>
+            <Text style={[styles.scorePct, { color: mColor }]}>{matchPct}%</Text>
             <Ionicons name="heart" size={24} color={mColor} style={{ marginLeft: 6 }} />
           </View>
-          <Text className="text-xs font-body text-muted mt-1">
-            {matchPct >= 80
-              ? 'Strong alignment'
-              : matchPct >= 50
-              ? 'Some key differences in expression'
-              : 'Significant gap — talk about it'}
+          <Text style={styles.scoreDesc}>
+            {matchPct >= 80 ? 'Strong alignment' : matchPct >= 50 ? 'Some key differences in expression' : 'Significant gap — talk about it'}
           </Text>
         </View>
 
-        {/* Language Breakdown comparison */}
-        <Text className="text-base font-heading text-foreground mb-4">Language Breakdown</Text>
+        <Text style={styles.sectionTitle}>Language Breakdown</Text>
         {LANGUAGE_ORDER.map((key) => {
           const myScore = myQuiz?.scores[key] ?? 0;
           const partnerScore = partnerQuiz.scores[key];
-          const max = Math.max(myScore, partnerScore, 1);
           return (
-            <View key={key} className="mb-4">
-              <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-xs font-body text-foreground">{LANGUAGE_LABELS[key]}</Text>
-                <Text className="text-xs font-body text-muted">
-                  {myScore} / {partnerScore}
-                </Text>
+            <View key={key} style={styles.langRow}>
+              <View style={styles.langHeader}>
+                <Text style={styles.langLabel}>{LANGUAGE_LABELS[key]}</Text>
+                <Text style={styles.langScores}>{myScore} / {partnerScore}</Text>
               </View>
-              {/* My bar */}
-              <View className="h-1.5 rounded-full bg-border mb-1">
-                <View
-                  className="h-1.5 rounded-full"
-                  style={{
-                    width: `${(myScore / maxScore) * 100}%`,
-                    backgroundColor: LANGUAGE_COLORS[key],
-                  }}
-                />
+              <View style={styles.barTrack}>
+                <View style={[styles.barFill, { width: `${(myScore / maxScore) * 100}%`, backgroundColor: LANGUAGE_COLORS[key] }]} />
               </View>
-              {/* Partner bar */}
-              <View className="h-1.5 rounded-full bg-border">
-                <View
-                  className="h-1.5 rounded-full"
-                  style={{
-                    width: `${(partnerScore / maxScore) * 100}%`,
-                    backgroundColor: LANGUAGE_COLORS[key],
-                    opacity: 0.4,
-                  }}
-                />
+              <View style={styles.barTrack}>
+                <View style={[styles.barFill, { width: `${(partnerScore / maxScore) * 100}%`, backgroundColor: LANGUAGE_COLORS[key], opacity: 0.4 }]} />
               </View>
             </View>
           );
         })}
 
-        {/* Gap insight */}
         {myQuiz && (
-          <View className="bg-amber-tint rounded-2xl p-4 mb-8 border border-amber-tint">
-            <Text className="text-xs font-heading text-amber mb-1">The gap that matters</Text>
-            <Text className="text-sm font-body text-foreground">
-              You value <Text className="font-heading">{LANGUAGE_LABELS[myQuiz.primary]}</Text> most,
-              while {partner?.name ?? 'your partner'} values{' '}
-              <Text className="font-heading">{LANGUAGE_LABELS[partnerQuiz.primary]}</Text>.
-              Speaking each other's language bridges this gap.
+          <View style={styles.gapCard}>
+            <Text style={[styles.gapTitle, { color: colors.amber }]}>The gap that matters</Text>
+            <Text style={styles.gapBody}>
+              You value <Text style={styles.bold}>{LANGUAGE_LABELS[myQuiz.primary]}</Text> most, while {partner?.name ?? 'your partner'} values{' '}
+              <Text style={styles.bold}>{LANGUAGE_LABELS[partnerQuiz.primary]}</Text>. Speaking each other's language bridges this gap.
             </Text>
           </View>
         )}
@@ -238,3 +156,41 @@ export default function ComparisonScreen(): JSX.Element {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  emptyContainer: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+  emptyTitle: { fontSize: fontSizes.lg, fontFamily: fonts.heading, color: colors.foreground, marginTop: 16, marginBottom: 8, textAlign: 'center' },
+  emptyBody: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginBottom: 24 },
+  emptyBtn: { backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 12, paddingHorizontal: 24 },
+  emptyBtnText: { color: colors.white, fontSize: fontSizes.sm, fontFamily: fonts.heading },
+  outlineBtn: { marginTop: 16, borderWidth: 1, borderColor: colors.primary, borderRadius: radii.button, paddingVertical: 12, paddingHorizontal: 24, flexDirection: 'row', alignItems: 'center' },
+  outlineBtnText: { color: colors.primary, fontSize: fontSizes.sm, fontFamily: fonts.heading, marginRight: 4 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  avatarsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 16, marginBottom: 24, gap: 32 },
+  avatarItem: { alignItems: 'center' },
+  avatarCircle: { borderRadius: radii.full, backgroundColor: colors.roseTint, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontFamily: fonts.heading },
+  partnerCircle: { borderRadius: radii.full, backgroundColor: colors.purpleTint, alignItems: 'center', justifyContent: 'center' },
+  partnerInitial: { fontFamily: fonts.heading, color: colors.secondary, fontSize: fontSizes.xl2 },
+  avatarName: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.foreground, marginTop: 4 },
+  avatarLang: { fontSize: 10, fontFamily: fonts.body, color: colors.muted },
+  scoreBlock: { alignItems: 'center', marginBottom: 32 },
+  scoreLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 },
+  scoreRow: { flexDirection: 'row', alignItems: 'center' },
+  scorePct: { fontFamily: fonts.heading, fontSize: 48 },
+  scoreDesc: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginTop: 4 },
+  sectionTitle: { fontSize: fontSizes.base, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 16 },
+  langRow: { marginBottom: 16 },
+  langHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
+  langLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.foreground },
+  langScores: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted },
+  barTrack: { height: 6, borderRadius: radii.full, backgroundColor: colors.border, marginBottom: 4 },
+  barFill: { height: 6, borderRadius: radii.full },
+  gapCard: { backgroundColor: colors.amberTint, borderRadius: radii.xl2, padding: 16, marginBottom: 32 },
+  gapTitle: { fontSize: fontSizes.caption, fontFamily: fonts.heading, marginBottom: 4 },
+  gapBody: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+  bold: { fontFamily: fonts.heading },
+});

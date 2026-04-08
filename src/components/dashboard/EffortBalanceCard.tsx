@@ -1,6 +1,7 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
+import { colors, fonts, fontSizes, radii, shadow } from '../../styles/theme';
 
 interface EffortBalanceCardProps {
   balancePct: number | null;
@@ -8,30 +9,55 @@ interface EffortBalanceCardProps {
 }
 
 export function EffortBalanceCard({ balancePct, isLoading }: EffortBalanceCardProps): JSX.Element {
-  const handlePress = (): void => {
-    router.push('/effort-balance/');
-  };
-
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      className="bg-card rounded-2xl p-4 shadow-card flex-1"
-      activeOpacity={0.8}
-    >
-      <Text className="text-caption font-body text-muted mb-1">Effort Balance</Text>
+    <TouchableOpacity onPress={() => router.push('/effort-balance/')} style={styles.card} activeOpacity={0.8}>
+      <Text style={styles.label}>Effort Balance</Text>
       {isLoading ? (
-        <Text className="text-body font-body text-muted">Loading...</Text>
+        <Text style={styles.muted}>Loading...</Text>
       ) : balancePct !== null ? (
-        <View className="mt-1">
-          <Text className="text-h2 font-heading text-foreground">{balancePct}%</Text>
-          <Text className="text-caption font-body text-muted">your share</Text>
+        <View style={styles.mt}>
+          <Text style={styles.value}>{balancePct}%</Text>
+          <Text style={styles.muted}>your share</Text>
         </View>
       ) : (
-        <View className="mt-1">
-          <Text className="text-body font-body text-muted mb-2">Not logged yet</Text>
-          <Text className="text-primary text-caption font-body-medium">Start →</Text>
+        <View style={styles.mt}>
+          <Text style={[styles.muted, styles.mb]}>Not logged yet</Text>
+          <Text style={styles.cta}>Start →</Text>
         </View>
       )}
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: radii.xl2,
+    padding: 16,
+    flex: 1,
+    ...shadow.card,
+  },
+  label: {
+    fontSize: fontSizes.caption,
+    fontFamily: fonts.body,
+    color: colors.muted,
+    marginBottom: 4,
+  },
+  muted: {
+    fontSize: fontSizes.sm,
+    fontFamily: fonts.body,
+    color: colors.muted,
+  },
+  mt: { marginTop: 4 },
+  mb: { marginBottom: 8 },
+  value: {
+    fontSize: fontSizes.xl,
+    fontFamily: fonts.heading,
+    color: colors.foreground,
+  },
+  cta: {
+    fontSize: fontSizes.caption,
+    fontFamily: fonts.bodyMedium,
+    color: colors.primary,
+  },
+});

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, Share, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Share, Alert, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,10 +9,11 @@ import { useSessionStore } from '../../src/store/session';
 import { usersService } from '../../src/services/users';
 import { apiFetch, API } from '../../src/config/api';
 import { LoadingScreen } from '../../src/components/ui/LoadingScreen';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 import type { PartnerInvite } from '../../src/types';
 
 const FEATURES = [
-  { icon: 'git-compare-outline', label: 'Side-by-side comparison', desc: 'See your Love Languages next to your partner\'s' },
+  { icon: 'git-compare-outline', label: 'Side-by-side comparison', desc: "See your Love Languages next to your partner's" },
   { icon: 'flag-outline',        label: 'Shared Milestones',        desc: 'Track your LovePath stage together' },
   { icon: 'chatbubbles-outline', label: 'Interaction Prompts',      desc: 'Custom conversation starters based on your styles' },
   { icon: 'heart-circle-outline',label: 'Effort Balance',           desc: 'Compare contributions from both sides' },
@@ -107,73 +108,64 @@ export default function PartnerInviteScreen(): JSX.Element {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-4 pb-2">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+          <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text className="flex-1 text-center text-sm font-heading text-primary">LovePath</Text>
-        <View className="w-6" />
+        <Text style={styles.headerTitle}>LovePath</Text>
+        <View style={styles.spacer} />
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* Title */}
-        <Text className="text-2xl font-heading text-foreground mt-4 mb-1">Invite Your Partner</Text>
-        <Text className="text-sm font-body text-muted mb-6">
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Invite Your Partner</Text>
+        <Text style={styles.subtitle}>
           Connect profiles to unlock side-by-side insights and shared features.
         </Text>
 
         {isConnected ? (
-          /* Already connected state */
-          <View className="items-center py-8">
-            <View className="w-20 h-20 rounded-full bg-rose-tint items-center justify-center mb-4">
-              <Ionicons name="heart" size={36} color="#C0556A" />
+          <View style={styles.connectedBlock}>
+            <View style={styles.heartCircleLg}>
+              <Ionicons name="heart" size={36} color={colors.primary} />
             </View>
-            <Text className="text-xl font-heading text-foreground mb-1">Connected!</Text>
-            <Text className="text-sm font-body text-muted text-center px-8 mb-8">
+            <Text style={styles.connectedTitle}>Connected!</Text>
+            <Text style={styles.connectedBody}>
               You and your partner are linked. All shared features are active.
             </Text>
-            <TouchableOpacity
-              className="border border-border rounded-full py-3 px-6"
-              onPress={handleDisconnect}
-            >
-              <Text className="text-sm font-body text-muted">Disconnect partner</Text>
+            <TouchableOpacity style={styles.disconnectBtn} onPress={handleDisconnect}>
+              <Text style={styles.disconnectText}>Disconnect partner</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <>
-            {/* Heart illustration */}
-            <View className="items-center py-8">
-              <View className="w-24 h-24 rounded-full bg-rose-tint items-center justify-center">
-                <Ionicons name="heart" size={44} color="#C0556A" />
+            <View style={styles.heroBlock}>
+              <View style={styles.heartCircle}>
+                <Ionicons name="heart" size={44} color={colors.primary} />
               </View>
             </View>
 
-            {/* Features list */}
-            <View className="mb-6">
-              <Text className="text-base font-heading text-foreground mb-4">Build this together</Text>
-              <Text className="text-sm font-body text-muted mb-4">
+            <View style={styles.featureList}>
+              <Text style={styles.featureTitle}>Build this together</Text>
+              <Text style={styles.featureDesc}>
                 When both partners complete the Love Language quiz, we can unlock personalised insights for your unique dynamic.
               </Text>
               {FEATURES.map((f) => (
-                <View key={f.label} className="flex-row items-start mb-3">
-                  <View className="w-8 h-8 rounded-full bg-rose-tint items-center justify-center mr-3 mt-0.5">
-                    <Ionicons name={f.icon as keyof typeof Ionicons.glyphMap} size={16} color="#C0556A" />
+                <View key={f.label} style={styles.featureRow}>
+                  <View style={styles.featureIconCircle}>
+                    <Ionicons name={f.icon as keyof typeof Ionicons.glyphMap} size={16} color={colors.primary} />
                   </View>
-                  <View className="flex-1">
-                    <Text className="text-sm font-heading text-foreground">{f.label}</Text>
-                    <Text className="text-xs font-body text-muted">{f.desc}</Text>
+                  <View style={styles.flex1}>
+                    <Text style={styles.featureLabel}>{f.label}</Text>
+                    <Text style={styles.featureSubtitle}>{f.desc}</Text>
                   </View>
                 </View>
               ))}
             </View>
 
-            {/* Invite code / expiry */}
             {activeInvite && (
-              <View className="bg-card rounded-2xl p-4 mb-4 border border-border">
-                <Text className="text-xs font-body text-muted mb-1">Invite link (expires in 7 days)</Text>
-                <Text className="text-sm font-heading text-foreground" numberOfLines={1}>
+              <View style={styles.inviteCard}>
+                <Text style={styles.inviteCardLabel}>Invite link (expires in 7 days)</Text>
+                <Text style={styles.inviteUrl} numberOfLines={1}>
                   {getInviteUrl(activeInvite.code)}
                 </Text>
               </View>
@@ -181,46 +173,34 @@ export default function PartnerInviteScreen(): JSX.Element {
           </>
         )}
 
-        <View className="h-4" />
+        <View style={{ height: 16 }} />
       </ScrollView>
 
-      {/* CTAs */}
       {!isConnected && (
-        <View className="px-5 pb-6 gap-3">
+        <View style={styles.ctaBlock}>
           {!activeInvite ? (
             <TouchableOpacity
-              className="w-full bg-primary rounded-full py-4 items-center"
+              style={styles.primaryBtn}
               onPress={handleGetOrCreateInvite}
               disabled={createInvite.isPending}
               activeOpacity={0.85}
             >
-              <Text className="text-white text-base font-heading">Generate invite link</Text>
+              <Text style={styles.primaryBtnText}>Generate invite link</Text>
             </TouchableOpacity>
           ) : (
             <>
-              <TouchableOpacity
-                className="w-full bg-primary rounded-full py-4 flex-row items-center justify-center"
-                onPress={handleCopyLink}
-                activeOpacity={0.85}
-              >
+              <TouchableOpacity style={styles.copyBtn} onPress={handleCopyLink} activeOpacity={0.85}>
                 <Ionicons
                   name={copied ? 'checkmark' : 'copy-outline'}
                   size={18}
-                  color="#FFF"
+                  color={colors.white}
                   style={{ marginRight: 8 }}
                 />
-                <Text className="text-white text-base font-heading">
-                  {copied ? 'Copied!' : 'Copy invite link'}
-                </Text>
+                <Text style={styles.primaryBtnText}>{copied ? 'Copied!' : 'Copy invite link'}</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                className="w-full rounded-full py-4 flex-row items-center justify-center"
-                style={{ backgroundColor: '#7F77DD' }}
-                onPress={handleShare}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="share-social-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
-                <Text className="text-white text-base font-heading">Send via WhatsApp / SMS</Text>
+              <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.85}>
+                <Ionicons name="share-social-outline" size={18} color={colors.white} style={{ marginRight: 8 }} />
+                <Text style={styles.primaryBtnText}>Send via WhatsApp / SMS</Text>
               </TouchableOpacity>
             </>
           )}
@@ -229,3 +209,37 @@ export default function PartnerInviteScreen(): JSX.Element {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  spacer: { width: 24 },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  title: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.foreground, marginTop: 16, marginBottom: 4 },
+  subtitle: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, marginBottom: 24 },
+  connectedBlock: { alignItems: 'center', paddingVertical: 32 },
+  heartCircleLg: { width: 80, height: 80, borderRadius: radii.full, backgroundColor: colors.roseTint, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  connectedTitle: { fontSize: fontSizes.xl, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 4 },
+  connectedBody: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, textAlign: 'center', paddingHorizontal: 32, marginBottom: 32 },
+  disconnectBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: radii.full, paddingVertical: 12, paddingHorizontal: 24 },
+  disconnectText: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted },
+  heroBlock: { alignItems: 'center', paddingVertical: 32 },
+  heartCircle: { width: 96, height: 96, borderRadius: radii.full, backgroundColor: colors.roseTint, alignItems: 'center', justifyContent: 'center' },
+  featureList: { marginBottom: 24 },
+  featureTitle: { fontSize: fontSizes.base, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 16 },
+  featureDesc: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, marginBottom: 16 },
+  featureRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
+  featureIconCircle: { width: 32, height: 32, borderRadius: radii.full, backgroundColor: colors.roseTint, alignItems: 'center', justifyContent: 'center', marginRight: 12, marginTop: 2 },
+  flex1: { flex: 1 },
+  featureLabel: { fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.foreground },
+  featureSubtitle: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted },
+  inviteCard: { backgroundColor: colors.card, borderRadius: radii.xl2, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border },
+  inviteCardLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginBottom: 4 },
+  inviteUrl: { fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.foreground },
+  ctaBlock: { paddingHorizontal: 20, paddingBottom: 24, gap: 12 },
+  primaryBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, alignItems: 'center' },
+  copyBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  shareBtn: { width: '100%', backgroundColor: colors.secondary, borderRadius: radii.button, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  primaryBtnText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+});

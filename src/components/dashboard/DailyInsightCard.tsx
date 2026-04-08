@@ -1,6 +1,7 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
+import { colors, fonts, fontSizes, radii, shadow } from '../../styles/theme';
 import type { Insight } from '../../types';
 
 interface DailyInsightCardProps {
@@ -9,32 +10,58 @@ interface DailyInsightCardProps {
 }
 
 export function DailyInsightCard({ insight, isLoading }: DailyInsightCardProps): JSX.Element {
-  const handlePress = (): void => {
-    router.push('/insights/');
-  };
-
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      className="bg-purple-tint rounded-2xl p-4 shadow-card"
-      activeOpacity={0.8}
-    >
-      <Text className="text-caption font-body-medium text-secondary mb-2">Daily Insight</Text>
+    <TouchableOpacity onPress={() => router.push('/insights/')} style={styles.card} activeOpacity={0.8}>
+      <Text style={styles.label}>Daily Insight</Text>
       {isLoading ? (
-        <Text className="text-body font-body text-muted">Loading...</Text>
+        <Text style={styles.muted}>Loading...</Text>
       ) : insight ? (
         <>
-          <Text className="text-body font-body text-foreground mb-3" numberOfLines={4}>
-            "{insight.text}"
-          </Text>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-caption font-body text-muted">— {insight.source}</Text>
-            <Text className="text-primary text-caption font-body-medium">Reflect →</Text>
+          <Text style={styles.body} numberOfLines={4}>"{insight.text}"</Text>
+          <View style={styles.footer}>
+            <Text style={styles.muted}>— {insight.source}</Text>
+            <Text style={styles.cta}>Reflect →</Text>
           </View>
         </>
       ) : (
-        <Text className="text-body font-body text-muted">No insight for today.</Text>
+        <Text style={styles.muted}>No insight for today.</Text>
       )}
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: colors.purpleTint,
+    borderRadius: radii.xl2,
+    padding: 16,
+    ...shadow.card,
+  },
+  label: {
+    fontSize: fontSizes.caption,
+    fontFamily: fonts.bodyMedium,
+    color: colors.secondary,
+    marginBottom: 8,
+  },
+  body: {
+    fontSize: fontSizes.sm,
+    fontFamily: fonts.body,
+    color: colors.foreground,
+    marginBottom: 12,
+  },
+  muted: {
+    fontSize: fontSizes.sm,
+    fontFamily: fonts.body,
+    color: colors.muted,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cta: {
+    fontSize: fontSizes.caption,
+    fontFamily: fonts.bodyMedium,
+    color: colors.primary,
+  },
+});

@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./public/assets/svg/logo.svg",
         "backgroundColor": "#FAF9F6"
       },
       "package": "com.lovepath.app"

@@ -1,10 +1,20 @@
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { colors } from '../../styles/theme';
 
 export function LoadingScreen() {
   return (
-    <View className="flex-1 bg-background items-center justify-center">
-      <ActivityIndicator size="large" color="#C0556A" />
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, fonts, fontSizes, radii } from '../../styles/theme';
 
 interface SliderRowProps {
   label: string;
@@ -9,10 +10,10 @@ interface SliderRowProps {
 
 export function SliderRow({ label, value, onChange }: SliderRowProps) {
   return (
-    <View className="flex-row items-center gap-3">
-      <Text className="text-foreground text-body flex-1">{label}</Text>
+    <View style={styles.row}>
+      <Text style={styles.label}>{label}</Text>
 
-      <View className="flex-row gap-1 items-center">
+      <View style={styles.dots}>
         {Array.from({ length: 10 }, (_, i) => {
           const dotIndex = i + 1;
           const filled = dotIndex <= value;
@@ -23,7 +24,7 @@ export function SliderRow({ label, value, onChange }: SliderRowProps) {
                 key={dotIndex}
                 onPress={() => onChange(dotIndex)}
                 activeOpacity={0.7}
-                className={`w-2 h-2 rounded-full ${filled ? 'bg-primary' : 'bg-border'}`}
+                style={[styles.dot, { backgroundColor: filled ? colors.primary : colors.border }]}
               />
             );
           }
@@ -31,13 +32,44 @@ export function SliderRow({ label, value, onChange }: SliderRowProps) {
           return (
             <View
               key={dotIndex}
-              className={`w-2 h-2 rounded-full ${filled ? 'bg-primary' : 'bg-border'}`}
+              style={[styles.dot, { backgroundColor: filled ? colors.primary : colors.border }]}
             />
           );
         })}
       </View>
 
-      <Text className="text-foreground text-body-md w-5 text-right">{value}</Text>
+      <Text style={styles.value}>{value}</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  label: {
+    flex: 1,
+    color: colors.foreground,
+    fontFamily: fonts.body,
+    fontSize: fontSizes.sm,
+  },
+  dots: {
+    flexDirection: 'row',
+    gap: 4,
+    alignItems: 'center',
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: radii.full,
+  },
+  value: {
+    color: colors.foreground,
+    fontFamily: fonts.bodyMedium,
+    fontSize: fontSizes.sm,
+    width: 20,
+    textAlign: 'right',
+  },
+});

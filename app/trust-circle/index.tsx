@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, TextInput, Modal } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -7,20 +7,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSessionStore } from '../../src/store/session';
 import { trustService } from '../../src/services/trustCircle';
 import { LoadingScreen } from '../../src/components/ui/LoadingScreen';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 import type { TrustPerson, TrustStatus } from '../../src/types';
 
 const DEFAULTS: Omit<TrustPerson, 'id' | 'userId'>[] = [
-  { name: 'Partner',       role: 'Romantic partner', yourInvestment: 3, theirInvestment: 3 },
-  { name: 'Close Friend',  role: 'Friend',            yourInvestment: 3, theirInvestment: 3 },
-  { name: 'Mentor',        role: 'Advisor/Mentor',    yourInvestment: 3, theirInvestment: 3 },
+  { name: 'Partner',      role: 'Romantic partner',  yourInvestment: 3, theirInvestment: 3 },
+  { name: 'Close Friend', role: 'Friend',             yourInvestment: 3, theirInvestment: 3 },
+  { name: 'Mentor',       role: 'Advisor/Mentor',     yourInvestment: 3, theirInvestment: 3 },
 ];
 
 const STATUS_ORDER: TrustStatus[] = ['Mutual', 'Watch', 'One-sided'];
 
-const STATUS_STYLES: Record<TrustStatus, { bg: string; text: string; border: string }> = {
-  Mutual:      { bg: '#E1F5EE', text: '#268947', border: '#268947' },
-  Watch:       { bg: '#FAEEDA', text: '#EF9F27', border: '#EF9F27' },
-  'One-sided': { bg: '#FDEAE8', text: '#E24B4A', border: '#E24B4A' },
+const STATUS_COLORS: Record<TrustStatus, { bg: string; text: string; border: string }> = {
+  Mutual:      { bg: colors.tealTint,  text: '#268947',      border: '#268947' },
+  Watch:       { bg: colors.amberTint, text: colors.amber,   border: colors.amber },
+  'One-sided': { bg: '#FDEAE8',        text: colors.danger,  border: colors.danger },
 };
 
 function getStatus(yours: number, theirs: number): TrustStatus {
@@ -30,28 +31,12 @@ function getStatus(yours: number, theirs: number): TrustStatus {
   return 'Mutual';
 }
 
-interface DotRatingProps {
-  value: number;
-  onChange: (v: number) => void;
-  color: string;
-}
-
-function DotRating({ value, onChange, color }: DotRatingProps): JSX.Element {
+function DotRating({ value, onChange, color }: { value: number; onChange: (v: number) => void; color: string }): JSX.Element {
   return (
-    <View className="flex-row gap-1">
+    <View style={styles.dotRow}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <TouchableOpacity
-          key={i}
-          onPress={() => onChange(i + 1)}
-          hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-        >
-          <View
-            className="w-5 h-5 rounded-full border-2"
-            style={{
-              backgroundColor: i < value ? color : 'transparent',
-              borderColor: i < value ? color : '#D4D2CC',
-            }}
-          />
+        <TouchableOpacity key={i} onPress={() => onChange(i + 1)} hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}>
+          <View style={[styles.dot, { backgroundColor: i < value ? color : 'transparent', borderColor: i < value ? color : '#D4D2CC' }]} />
         </TouchableOpacity>
       ))}
     </View>
@@ -65,32 +50,15 @@ export default function TrustCircleScreen(): JSX.Element {
   const [newName, setNewName] = useState('');
   const [newRole, setNewRole] = useState('');
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['trustCircle', userId],
-    queryFn: () => trustService.getByUser(userId),
-  });
+  const { data, isLoading } = useQuery({ queryKey: ['trustCircle', userId], queryFn: () => trustService.getByUser(userId) });
 
-  const createMutation = useMutation({
-    mutationFn: (p: Omit<TrustPerson, 'id'>) => trustService.create(p),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trustCircle', userId] }),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data: d }: { id: number; data: Partial<TrustPerson> }) =>
-      trustService.update(id, d),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trustCircle', userId] }),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => trustService.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trustCircle', userId] }),
-  });
+  const createMutation = useMutation({ mutationFn: (p: Omit<TrustPerson, 'id'>) => trustService.create(p), onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trustCircle', userId] }) });
+  const updateMutation = useMutation({ mutationFn: ({ id, data: d }: { id: number; data: Partial<TrustPerson> }) => trustService.update(id, d), onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trustCircle', userId] }) });
+  const deleteMutation = useMutation({ mutationFn: (id: number) => trustService.delete(id), onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trustCircle', userId] }) });
 
   if (isLoading) return <LoadingScreen />;
 
   const people = data ?? [];
-
-  // Seed defaults if empty
   if (people.length === 0 && !isLoading && !createMutation.isPending) {
     DEFAULTS.forEach((d) => createMutation.mutate({ ...d, userId }));
   }
@@ -101,163 +69,131 @@ export default function TrustCircleScreen(): JSX.Element {
     return sa - sb;
   });
 
-  const onesided = sorted.filter(
-    (p) => getStatus(p.yourInvestment, p.theirInvestment) === 'One-sided',
-  );
+  const onesided = sorted.filter((p) => getStatus(p.yourInvestment, p.theirInvestment) === 'One-sided');
 
   function handleLongPress(person: TrustPerson): void {
-    Alert.alert(
-      `Remove ${person.name}?`,
-      'This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: () => deleteMutation.mutate(person.id) },
-      ],
-    );
+    Alert.alert(`Remove ${person.name}?`, 'This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => deleteMutation.mutate(person.id) },
+    ]);
   }
 
   function handleAddPerson(): void {
     if (!newName.trim()) return;
-    createMutation.mutate({
-      userId,
-      name: newName.trim(),
-      role: newRole.trim() || 'Friend',
-      yourInvestment: 3,
-      theirInvestment: 3,
-    });
-    setNewName('');
-    setNewRole('');
-    setShowAdd(false);
+    createMutation.mutate({ userId, name: newName.trim(), role: newRole.trim() || 'Friend', yourInvestment: 3, theirInvestment: 3 });
+    setNewName(''); setNewRole(''); setShowAdd(false);
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-4 pb-2">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+          <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text className="flex-1 text-center text-sm font-heading text-primary">LovePath</Text>
+        <Text style={styles.headerTitle}>LovePath</Text>
         <TouchableOpacity onPress={() => setShowAdd(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="person-add-outline" size={22} color="#C0556A" />
+          <Ionicons name="person-add-outline" size={22} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        <Text className="text-2xl font-heading text-foreground mt-4 mb-1">Your circle</Text>
-        <Text className="text-sm font-body text-muted mb-5">
-          Rate investment on both sides. One-sided patterns are early warning signs.
-        </Text>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Your circle</Text>
+        <Text style={styles.subtitle}>Rate investment on both sides. One-sided patterns are early warning signs.</Text>
 
-        {/* One-sided alert cards */}
         {onesided.map((p) => (
-          <View key={`alert-${p.id}`} className="bg-rose-tint rounded-2xl p-4 mb-3 flex-row items-start">
-            <Ionicons name="warning" size={16} color="#C0556A" style={{ marginRight: 8, marginTop: 2 }} />
-            <View className="flex-1">
-              <Text className="text-sm font-heading text-primary mb-0.5">One-sided with {p.name}</Text>
-              <Text className="text-xs font-body text-foreground">
-                You are investing significantly more. Consider whether this is sustainable.
-              </Text>
+          <View key={`alert-${p.id}`} style={styles.alertCard}>
+            <Ionicons name="warning" size={16} color={colors.primary} style={{ marginRight: 8, marginTop: 2 }} />
+            <View style={styles.flex1}>
+              <Text style={styles.alertTitle}>One-sided with {p.name}</Text>
+              <Text style={styles.alertBody}>You are investing significantly more. Consider whether this is sustainable.</Text>
             </View>
           </View>
         ))}
 
-        {/* People cards */}
         {sorted.map((person) => {
           const st = getStatus(person.yourInvestment, person.theirInvestment);
-          const stStyle = STATUS_STYLES[st];
+          const stStyle = STATUS_COLORS[st];
           return (
-            <TouchableOpacity
-              key={person.id}
-              onLongPress={() => handleLongPress(person)}
-              activeOpacity={0.85}
-              className="bg-card rounded-2xl p-4 mb-3 border border-border"
-            >
-              <View className="flex-row items-start justify-between mb-3">
+            <TouchableOpacity key={person.id} onLongPress={() => handleLongPress(person)} activeOpacity={0.85} style={styles.personCard}>
+              <View style={styles.personHeader}>
                 <View>
-                  <Text className="text-base font-heading text-foreground">{person.name}</Text>
-                  <Text className="text-xs font-body text-muted">{person.role}</Text>
+                  <Text style={styles.personName}>{person.name}</Text>
+                  <Text style={styles.personRole}>{person.role}</Text>
                 </View>
-                <View
-                  className="px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: stStyle.bg, borderWidth: 1, borderColor: stStyle.border }}
-                >
-                  <Text className="text-xs font-heading" style={{ color: stStyle.text }}>{st}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: stStyle.bg, borderColor: stStyle.border }]}>
+                  <Text style={[styles.statusText, { color: stStyle.text }]}>{st}</Text>
                 </View>
               </View>
 
-              <View className="flex-row items-center justify-between mb-2">
-                <Text className="text-xs font-body text-muted w-16">You</Text>
-                <DotRating
-                  value={person.yourInvestment}
-                  onChange={(v) => updateMutation.mutate({ id: person.id, data: { yourInvestment: v } })}
-                  color="#C0556A"
-                />
+              <View style={styles.ratingRow}>
+                <Text style={styles.ratingLabel}>You</Text>
+                <DotRating value={person.yourInvestment} onChange={(v) => updateMutation.mutate({ id: person.id, data: { yourInvestment: v } })} color={colors.primary} />
               </View>
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs font-body text-muted w-16">Them</Text>
-                <DotRating
-                  value={person.theirInvestment}
-                  onChange={(v) => updateMutation.mutate({ id: person.id, data: { theirInvestment: v } })}
-                  color="#7F77DD"
-                />
+              <View style={styles.ratingRow}>
+                <Text style={styles.ratingLabel}>Them</Text>
+                <DotRating value={person.theirInvestment} onChange={(v) => updateMutation.mutate({ id: person.id, data: { theirInvestment: v } })} color={colors.secondary} />
               </View>
             </TouchableOpacity>
           );
         })}
 
-        <View className="h-4" />
+        <View style={{ height: 16 }} />
       </ScrollView>
 
-      {/* Add button */}
-      <View className="px-5 pb-6">
-        <TouchableOpacity
-          className="w-full border border-primary rounded-full py-4 flex-row items-center justify-center"
-          onPress={() => setShowAdd(true)}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="add" size={18} color="#C0556A" style={{ marginRight: 6 }} />
-          <Text className="text-primary text-base font-heading">Add person</Text>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)} activeOpacity={0.85}>
+          <Ionicons name="add" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+          <Text style={styles.addBtnText}>Add person</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Add person modal */}
       <Modal visible={showAdd} transparent animationType="slide" onRequestClose={() => setShowAdd(false)}>
-        <TouchableOpacity
-          className="flex-1 bg-black/40"
-          activeOpacity={1}
-          onPress={() => setShowAdd(false)}
-        />
-        <View className="bg-background rounded-t-3xl px-5 pt-6 pb-10">
-          <Text className="text-lg font-heading text-foreground mb-5">Add to your circle</Text>
-
-          <Text className="text-xs font-body text-muted mb-1">Name</Text>
-          <TextInput
-            className="bg-card border border-border rounded-xl px-4 py-3 text-sm font-body text-foreground mb-4"
-            placeholder="e.g. Alex"
-            placeholderTextColor="#B4B2A9"
-            value={newName}
-            onChangeText={setNewName}
-          />
-
-          <Text className="text-xs font-body text-muted mb-1">Role</Text>
-          <TextInput
-            className="bg-card border border-border rounded-xl px-4 py-3 text-sm font-body text-foreground mb-6"
-            placeholder="e.g. Close Friend"
-            placeholderTextColor="#B4B2A9"
-            value={newRole}
-            onChangeText={setNewRole}
-          />
-
-          <TouchableOpacity
-            className="w-full bg-primary rounded-full py-4 items-center"
-            onPress={handleAddPerson}
-            activeOpacity={0.85}
-          >
-            <Text className="text-white text-base font-heading">Add</Text>
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={() => setShowAdd(false)} />
+        <View style={styles.sheet}>
+          <Text style={styles.sheetTitle}>Add to your circle</Text>
+          <Text style={styles.fieldLabel}>Name</Text>
+          <TextInput style={styles.input} placeholder="e.g. Alex" placeholderTextColor={colors.hint} value={newName} onChangeText={setNewName} />
+          <Text style={styles.fieldLabel}>Role</Text>
+          <TextInput style={[styles.input, styles.inputMb]} placeholder="e.g. Close Friend" placeholderTextColor={colors.hint} value={newRole} onChangeText={setNewRole} />
+          <TouchableOpacity style={styles.primaryBtn} onPress={handleAddPerson} activeOpacity={0.85}>
+            <Text style={styles.primaryBtnText}>Add</Text>
           </TouchableOpacity>
         </View>
       </Modal>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  title: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.foreground, marginTop: 16, marginBottom: 4 },
+  subtitle: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted, marginBottom: 20 },
+  alertCard: { backgroundColor: colors.roseTint, borderRadius: radii.xl2, padding: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'flex-start' },
+  flex1: { flex: 1 },
+  alertTitle: { fontSize: fontSizes.sm, fontFamily: fonts.heading, color: colors.primary, marginBottom: 2 },
+  alertBody: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.foreground },
+  personCard: { backgroundColor: colors.card, borderRadius: radii.xl2, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: colors.border },
+  personHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 },
+  personName: { fontSize: fontSizes.base, fontFamily: fonts.heading, color: colors.foreground },
+  personRole: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: radii.full, borderWidth: 1 },
+  statusText: { fontSize: fontSizes.caption, fontFamily: fonts.heading },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  ratingLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, width: 64 },
+  dotRow: { flexDirection: 'row', gap: 4 },
+  dot: { width: 20, height: 20, borderRadius: radii.full, borderWidth: 2 },
+  footer: { paddingHorizontal: 20, paddingBottom: 24 },
+  addBtn: { width: '100%', borderWidth: 1, borderColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  addBtnText: { color: colors.primary, fontSize: fontSizes.base, fontFamily: fonts.heading },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: { backgroundColor: colors.background, borderTopLeftRadius: radii.xl3, borderTopRightRadius: radii.xl3, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 },
+  sheetTitle: { fontSize: fontSizes.lg, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 20 },
+  fieldLabel: { fontSize: fontSizes.caption, fontFamily: fonts.body, color: colors.muted, marginBottom: 4 },
+  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radii.xl, paddingHorizontal: 16, paddingVertical: 12, fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground, marginBottom: 16 },
+  inputMb: { marginBottom: 24 },
+  primaryBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: radii.button, paddingVertical: 16, alignItems: 'center' },
+  primaryBtnText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+});

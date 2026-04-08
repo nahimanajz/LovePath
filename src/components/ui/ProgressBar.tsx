@@ -1,24 +1,37 @@
 import React from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { colors, radii } from '../../styles/theme';
 
 interface ProgressBarProps {
   value: number; // 0–100
   color?: string;
-  className?: string;
+  style?: object;
 }
 
-export function ProgressBar({ value, color, className = '' }: ProgressBarProps) {
+export function ProgressBar({ value, color, style }: ProgressBarProps) {
   const clampedValue = Math.min(100, Math.max(0, value));
 
   return (
-    <View className={`bg-border h-2 rounded-full overflow-hidden ${className}`}>
+    <View style={[styles.track, style]}>
       <View
-        className={`h-2 rounded-full ${color ? '' : 'bg-primary'}`}
-        style={{
-          width: `${clampedValue}%`,
-          ...(color ? { backgroundColor: color } : {}),
-        }}
+        style={[
+          styles.fill,
+          { width: `${clampedValue}%`, backgroundColor: color ?? colors.primary },
+        ]}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  track: {
+    backgroundColor: colors.border,
+    height: 8,
+    borderRadius: radii.full,
+    overflow: 'hidden',
+  },
+  fill: {
+    height: 8,
+    borderRadius: radii.full,
+  },
+});

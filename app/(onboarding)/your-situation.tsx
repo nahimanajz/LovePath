@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSessionStore } from '../../src/store/session';
+import { colors, fonts, fontSizes, radii } from '../../src/styles/theme';
 
 type SituationType = 'relationship_building' | 'early_dating' | 'recovering' | 'starting_over';
 
@@ -14,44 +15,22 @@ interface SituationOption {
 }
 
 const SITUATIONS: SituationOption[] = [
-  {
-    value: 'relationship_building',
-    label: 'In a relationship, building something real',
-    icon: 'construct-outline',
-  },
-  {
-    value: 'early_dating',
-    label: 'Dating someone, figuring things out early',
-    icon: 'heart-circle-outline',
-  },
-  {
-    value: 'recovering',
-    label: 'Recovering from betrayal or hurt',
-    icon: 'refresh-outline',
-  },
-  {
-    value: 'starting_over',
-    label: 'Starting over, want to understand love better',
-    icon: 'sunny-outline',
-  },
+  { value: 'relationship_building', label: 'In a relationship, building something real', icon: 'construct-outline' },
+  { value: 'early_dating', label: 'Dating someone, figuring things out early', icon: 'heart-circle-outline' },
+  { value: 'recovering', label: 'Recovering from betrayal or hurt', icon: 'refresh-outline' },
+  { value: 'starting_over', label: 'Starting over, want to understand love better', icon: 'sunny-outline' },
 ];
 
-interface ProgressDotsProps {
-  total: number;
-  active: number;
-}
-
-function ProgressDots({ total, active }: ProgressDotsProps): JSX.Element {
+function ProgressDots({ total, active }: { total: number; active: number }): JSX.Element {
   return (
-    <View className="flex-row items-center gap-1">
+    <View style={styles.dotsRow}>
       {Array.from({ length: total }).map((_, i) => (
         <View
           key={i}
-          className="h-2 rounded-full"
-          style={{
-            width: i === active ? 20 : 8,
-            backgroundColor: i === active ? '#C0556A' : '#E8E6E0',
-          }}
+          style={[
+            styles.dot,
+            { width: i === active ? 20 : 8, backgroundColor: i === active ? colors.primary : colors.border },
+          ]}
         />
       ))}
     </View>
@@ -69,77 +48,83 @@ export default function YourSituationScreen(): JSX.Element {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-5 pt-4 pb-2">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+          <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
         <ProgressDots total={3} active={1} />
-        <View className="w-6" />
+        <View style={styles.spacer} />
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* Title */}
-        <View className="mt-6 mb-8">
-          <Text className="text-2xl font-heading text-foreground mb-2">
-            What describes you best?
-          </Text>
-          <Text className="text-sm font-body text-muted">
-            We'll tailor your experience.
-          </Text>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.titleBlock}>
+          <Text style={styles.title}>What describes you best?</Text>
+          <Text style={styles.subtitle}>We'll tailor your experience.</Text>
         </View>
 
-        {/* Situation cards */}
         {SITUATIONS.map((option) => {
           const isSelected = selected === option.value;
           return (
             <TouchableOpacity
               key={option.value}
-              className={`flex-row items-center rounded-2xl p-4 mb-3 border ${
-                isSelected
-                  ? 'border-primary bg-rose-tint border-2'
-                  : 'border-border bg-card border'
-              }`}
+              style={[styles.optionCard, isSelected ? styles.optionSelected : styles.optionDefault]}
               onPress={() => setSelected(option.value)}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name={option.icon}
-                size={20}
-                color={isSelected ? '#C0556A' : '#888780'}
-                style={{ marginRight: 12 }}
-              />
-              <Text
-                className={`flex-1 text-sm font-body ${
-                  isSelected ? 'text-foreground' : 'text-foreground'
-                }`}
-              >
-                {option.label}
-              </Text>
-              {isSelected && (
-                <Ionicons name="checkmark-circle" size={20} color="#C0556A" />
-              )}
+              <Ionicons name={option.icon} size={20} color={isSelected ? colors.primary : colors.muted} style={{ marginRight: 12 }} />
+              <Text style={styles.optionLabel}>{option.label}</Text>
+              {isSelected && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
             </TouchableOpacity>
           );
         })}
 
-        <View className="h-8" />
+        <View style={styles.spacerLg} />
       </ScrollView>
 
-      {/* Footer */}
-      <View className="px-5 pb-6">
+      <View style={styles.footer}>
         <TouchableOpacity
-          className={`w-full rounded-full py-4 items-center ${
-            selected ? 'bg-primary' : 'bg-hint'
-          }`}
+          style={[styles.ctaBtn, { backgroundColor: selected ? colors.primary : colors.hint }]}
           onPress={handleContinue}
           disabled={!selected}
           activeOpacity={0.85}
         >
-          <Text className="text-white text-base font-heading">Continue</Text>
+          <Text style={styles.ctaText}>Continue</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  spacer: { width: 24 },
+  scroll: { flex: 1, paddingHorizontal: 20 },
+  titleBlock: { marginTop: 24, marginBottom: 32 },
+  title: { fontSize: fontSizes.xl2, fontFamily: fonts.heading, color: colors.foreground, marginBottom: 8 },
+  subtitle: { fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.muted },
+  dotsRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  dot: { height: 8, borderRadius: radii.full },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radii.xl2,
+    padding: 16,
+    marginBottom: 12,
+  },
+  optionDefault: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card },
+  optionSelected: { borderWidth: 2, borderColor: colors.primary, backgroundColor: colors.roseTint },
+  optionLabel: { flex: 1, fontSize: fontSizes.sm, fontFamily: fonts.body, color: colors.foreground },
+  spacerLg: { height: 32 },
+  footer: { paddingHorizontal: 20, paddingBottom: 24 },
+  ctaBtn: { width: '100%', borderRadius: radii.button, paddingVertical: 16, alignItems: 'center' },
+  ctaText: { color: colors.white, fontSize: fontSizes.base, fontFamily: fonts.heading },
+});

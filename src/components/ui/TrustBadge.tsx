@@ -1,32 +1,37 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { colors, fonts, fontSizes, radii } from '../../styles/theme';
 import type { TrustStatus } from '../../types';
 
 interface TrustBadgeProps {
   status: TrustStatus;
 }
 
-const statusStyles: Record<TrustStatus, { container: string; text: string }> = {
-  Mutual: {
-    container: 'bg-teal-tint',
-    text: 'text-teal',
-  },
-  Watch: {
-    container: 'bg-amber-tint',
-    text: 'text-amber',
-  },
-  'One-sided': {
-    container: 'bg-red-tint',
-    text: 'text-danger',
-  },
+const statusColors: Record<TrustStatus, { bg: string; text: string }> = {
+  Mutual:      { bg: colors.tealTint, text: colors.teal },
+  Watch:       { bg: colors.amberTint, text: colors.amber },
+  'One-sided': { bg: colors.redTint,  text: colors.danger },
 };
 
 export function TrustBadge({ status }: TrustBadgeProps) {
-  const { container, text } = statusStyles[status];
+  const { bg, text } = statusColors[status];
 
   return (
-    <View className={`px-3 py-1 rounded-full self-start ${container}`}>
-      <Text className={`text-xs font-semibold ${text}`}>{status}</Text>
+    <View style={[styles.badge, { backgroundColor: bg }]}>
+      <Text style={[styles.label, { color: text }]}>{status}</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: radii.full,
+    alignSelf: 'flex-start',
+  },
+  label: {
+    fontSize: fontSizes.caption,
+    fontFamily: fonts.heading,
+  },
+});
