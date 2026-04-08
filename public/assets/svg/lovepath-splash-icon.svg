@@ -1,0 +1,359 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- ╔══════════════════════════════════════╗
+       ║   BACKGROUND — transparent           ║
+       ╚══════════════════════════════════════╝ -->
+
+  <!-- Soft ambient glow behind the whole scene -->
+  <radialGradient id="ambientGlow" cx="50%" cy="52%" r="48%">
+    <stop offset="0%"   stop-color="#FDE8EC" stop-opacity="0.55"/>
+    <stop offset="100%" stop-color="#FDE8EC" stop-opacity="0"/>
+  </radialGradient>
+  <circle cx="200" cy="208" r="192" fill="url(#ambientGlow)"/>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║   GRADIENT DEFS                      ║
+       ╚══════════════════════════════════════╝ -->
+  <defs>
+
+    <!-- Rose person gradient -->
+    <linearGradient id="gHim" x1="0%" y1="0%" x2="60%" y2="100%">
+      <stop offset="0%"   stop-color="#E8849A"/>
+      <stop offset="100%" stop-color="#B03456"/>
+    </linearGradient>
+
+    <!-- Purple person gradient -->
+    <linearGradient id="gHer" x1="40%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#A59EEC"/>
+      <stop offset="100%" stop-color="#5A52B0"/>
+    </linearGradient>
+
+    <!-- Heart gradient — center bloom -->
+    <radialGradient id="gHeart" cx="45%" cy="38%" r="60%">
+      <stop offset="0%"   stop-color="#F0A0B4"/>
+      <stop offset="60%"  stop-color="#C0556A"/>
+      <stop offset="100%" stop-color="#9A2E47"/>
+    </radialGradient>
+
+    <!-- Path gradient underfoot -->
+    <linearGradient id="gPath" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#C0556A" stop-opacity="0.15"/>
+      <stop offset="50%"  stop-color="#C0556A" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#7F77DD" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <!-- Amber glow for spark between hands -->
+    <radialGradient id="gSpark" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#EF9F27" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#EF9F27" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Soft drop shadow filter -->
+    <filter id="fShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+      <feOffset dx="0" dy="6" result="offset"/>
+      <feComposite in="SourceGraphic" in2="offset" operator="over"/>
+    </filter>
+
+    <!-- Heart glow filter -->
+    <filter id="fHeartGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+  </defs>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║   THE PATH — curved road underfoot   ║
+       ╚══════════════════════════════════════╝ -->
+
+  <!-- Ground arc shadow -->
+  <ellipse cx="200" cy="348" rx="160" ry="12" fill="#C0556A" opacity="0.07"/>
+
+  <!-- The path itself — gentle upward curve representing growth -->
+  <path d="M 30 350 Q 200 318 370 350"
+    stroke="url(#gPath)" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+  <!-- Path stage nodes — 8 dots, rose → purple -->
+  <circle cx="62"  cy="344" r="4"   fill="#C0556A" opacity="0.30"/>
+  <circle cx="94"  cy="337" r="4.5" fill="#C0556A" opacity="0.42"/>
+  <circle cx="130" cy="331" r="5"   fill="#C0556A" opacity="0.58"/>
+  <circle cx="168" cy="327" r="5.5" fill="#C0556A" opacity="0.75"/>
+  <circle cx="200" cy="325" r="6"   fill="#C0556A" opacity="1"/>
+  <circle cx="234" cy="325" r="5.5" fill="#7F77DD" opacity="0.85"/>
+  <circle cx="270" cy="328" r="5"   fill="#7F77DD" opacity="0.65"/>
+  <circle cx="308" cy="334" r="4.5" fill="#7F77DD" opacity="0.42"/>
+  <circle cx="340" cy="341" r="4"   fill="#7F77DD" opacity="0.28"/>
+
+  <!-- Stage micro-labels under key dots -->
+  <text x="130" y="347" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="8.5" letter-spacing="0.8"
+    fill="#C0556A" opacity="0.55">ATTRACT</text>
+  <text x="168" y="342" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="8.5" letter-spacing="0.8"
+    fill="#C0556A" opacity="0.7">ACCEPT</text>
+  <text x="200" y="340" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="8.5" letter-spacing="0.8"
+    fill="#C0556A" opacity="0.9">ATTACH</text>
+  <text x="234" y="340" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="8.5" letter-spacing="0.8"
+    fill="#7F77DD" opacity="0.8">ASPIRE</text>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║   GROWING HEART — above centre       ║
+       ╚══════════════════════════════════════╝ -->
+
+  <!-- Outer soft glow ring -->
+  <path d="M 200 142
+    C 174 122, 132 128, 132 162
+    C 132 194, 164 218, 200 244
+    C 236 218, 268 194, 268 162
+    C 268 128, 226 122, 200 142 Z"
+    fill="#C0556A" opacity="0.10"/>
+
+  <!-- Mid glow ring -->
+  <path d="M 200 148
+    C 177 130, 140 136, 140 166
+    C 140 196, 170 218, 200 242
+    C 230 218, 260 196, 260 166
+    C 260 136, 223 130, 200 148 Z"
+    fill="#C0556A" opacity="0.16"/>
+
+  <!-- Main heart body -->
+  <path d="M 200 156
+    C 181 140, 150 146, 150 172
+    C 150 198, 178 218, 200 236
+    C 222 218, 250 198, 250 172
+    C 250 146, 219 140, 200 156 Z"
+    fill="url(#gHeart)"/>
+
+  <!-- Heart inner highlight (top-left lobe shine) -->
+  <path d="M 168 162 C 157 170, 152 184, 156 198"
+    stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.38"/>
+
+  <!-- Tiny sparkle cluster radiating from heart -->
+  <!-- Left sparkle -->
+  <g opacity="0.85">
+    <line x1="134" y1="150" x2="134" y2="164" stroke="#C0556A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="127" y1="157" x2="141" y2="157" stroke="#C0556A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="129" y1="152" x2="139" y2="162" stroke="#C0556A" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="139" y1="152" x2="129" y2="162" stroke="#C0556A" stroke-width="1.8" stroke-linecap="round"/>
+  </g>
+  <!-- Right sparkle -->
+  <g opacity="0.75">
+    <line x1="266" y1="144" x2="266" y2="156" stroke="#7F77DD" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="260" y1="150" x2="272" y2="150" stroke="#7F77DD" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="262" y1="146" x2="270" y2="154" stroke="#7F77DD" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="270" y1="146" x2="262" y2="154" stroke="#7F77DD" stroke-width="1.8" stroke-linecap="round"/>
+  </g>
+  <!-- Top mini sparkle -->
+  <g opacity="0.6">
+    <line x1="200" y1="110" x2="200" y2="120" stroke="#C0556A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="195" y1="115" x2="205" y2="115" stroke="#C0556A" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <!-- Floating dots ascending from heart -->
+  <circle cx="186" cy="122" r="3"   fill="#C0556A" opacity="0.38"/>
+  <circle cx="212" cy="114" r="2.5" fill="#7F77DD" opacity="0.32"/>
+  <circle cx="198" cy="104" r="1.8" fill="#C0556A" opacity="0.22"/>
+  <circle cx="207" cy="96"  r="1.2" fill="#7F77DD" opacity="0.15"/>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║   PERSON A — HIM (left, rose tones)  ║
+       ╚══════════════════════════════════════╝ -->
+
+  <!-- Ground shadow -->
+  <ellipse cx="148" cy="332" rx="20" ry="6" fill="#C0556A" opacity="0.10"/>
+
+  <!-- ── Legs — stride forward ── -->
+  <!-- Back leg (left) -->
+  <path d="M 150 292 Q 140 312, 134 328"
+    stroke="#9A2E47" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <!-- Front leg (right) — stepping forward -->
+  <path d="M 150 292 Q 158 312, 164 328"
+    stroke="#C0556A" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <!-- Shoes / feet -->
+  <ellipse cx="133" cy="329" rx="9" ry="5" fill="#9A2E47"/>
+  <ellipse cx="165" cy="329" rx="9" ry="5" fill="#B03456"/>
+
+  <!-- ── Body torso ── -->
+  <path d="M 150 248 C 145 264, 144 280, 150 292"
+    stroke="url(#gHim)" stroke-width="16" stroke-linecap="round" fill="none"/>
+
+  <!-- ── Back arm swinging ── -->
+  <path d="M 148 260 Q 126 272, 118 286"
+    stroke="#9A2E47" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <!-- Back hand -->
+  <circle cx="117" cy="287" r="7" fill="#9A2E47"/>
+
+  <!-- ── Front arm reaching toward her ── -->
+  <path d="M 148 260 Q 172 272, 183 282"
+    stroke="#C0556A" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <!-- Front hand (reaching) -->
+  <circle cx="184" cy="283" r="8" fill="#C0556A"/>
+
+  <!-- ── Neck ── -->
+  <line x1="150" y1="232" x2="150" y2="248"
+    stroke="#C0556A" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- ── Head ── -->
+  <circle cx="150" cy="218" r="26" fill="url(#gHim)"/>
+  <!-- Subtle head rim -->
+  <circle cx="150" cy="218" r="26" fill="none" stroke="#9A2E47" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- ── Hair — short neat ── -->
+  <path d="M 126 212 Q 128 192, 150 190 Q 172 192, 174 212"
+    fill="#9A2E47"/>
+  <path d="M 126 210 Q 124 202, 130 196" fill="#9A2E47"/>
+
+  <!-- ── Face — looking toward her (eyes right) ── -->
+  <!-- Eye white -->
+  <ellipse cx="158" cy="216" rx="5" ry="4.5" fill="white"/>
+  <!-- Iris — looking right toward her -->
+  <circle cx="160" cy="216" r="3.2" fill="#7A1A30"/>
+  <!-- Pupil -->
+  <circle cx="161" cy="216" r="1.5" fill="#2A0010"/>
+  <!-- Eye shine -->
+  <circle cx="160" cy="214" r="1" fill="white" opacity="0.7"/>
+
+  <!-- Eyebrow -->
+  <path d="M 154 209 Q 159 206, 164 208"
+    stroke="#7A1A30" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- Smile — warm, genuine -->
+  <path d="M 144 224 Q 151 231, 160 225"
+    stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85"/>
+
+  <!-- Cheek blush -->
+  <ellipse cx="166" cy="224" rx="5" ry="3" fill="#F0A0B4" opacity="0.4"/>
+
+  <!-- ╔════════════════════════════════════════╗
+       ║   PERSON B — HER (right, purple tones) ║
+       ╚════════════════════════════════════════╝ -->
+
+  <!-- Ground shadow -->
+  <ellipse cx="252" cy="332" rx="20" ry="6" fill="#7F77DD" opacity="0.10"/>
+
+  <!-- ── Legs ── -->
+  <!-- Back leg (right) -->
+  <path d="M 250 292 Q 260 312, 266 328"
+    stroke="#5A52B0" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <!-- Front leg (left) — stepping forward -->
+  <path d="M 250 292 Q 242 312, 236 328"
+    stroke="#7F77DD" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <!-- Shoes / feet -->
+  <ellipse cx="267" cy="329" rx="9" ry="5" fill="#5A52B0"/>
+  <ellipse cx="235" cy="329" rx="9" ry="5" fill="#6A62C4"/>
+
+  <!-- ── Body torso — slightly more curved (feminine silhouette) ── -->
+  <path d="M 250 248 C 255 264, 256 280, 250 292"
+    stroke="url(#gHer)" stroke-width="14" stroke-linecap="round" fill="none"/>
+
+  <!-- ── Back arm swinging ── -->
+  <path d="M 252 260 Q 274 272, 282 286"
+    stroke="#5A52B0" stroke-width="8.5" stroke-linecap="round" fill="none"/>
+  <circle cx="283" cy="287" r="7" fill="#5A52B0"/>
+
+  <!-- ── Front arm reaching toward him ── -->
+  <path d="M 252 260 Q 228 272, 217 282"
+    stroke="#7F77DD" stroke-width="8.5" stroke-linecap="round" fill="none"/>
+  <!-- Front hand (reaching) -->
+  <circle cx="216" cy="283" r="8" fill="#7F77DD"/>
+
+  <!-- ── Neck ── -->
+  <line x1="250" y1="232" x2="250" y2="248"
+    stroke="#7F77DD" stroke-width="11" stroke-linecap="round"/>
+
+  <!-- ── Head ── -->
+  <circle cx="250" cy="218" r="25" fill="url(#gHer)"/>
+  <circle cx="250" cy="218" r="25" fill="none" stroke="#5A52B0" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- ── Hair — longer, flowing ── -->
+  <!-- Main hair cap -->
+  <path d="M 227 210 Q 228 188, 250 186 Q 272 188, 276 200
+           Q 280 214, 278 224"
+    fill="#5A52B0"/>
+  <!-- Side strand left -->
+  <path d="M 226 210 Q 220 216, 222 228 Q 222 238, 226 244"
+    fill="#5A52B0" opacity="0.8"/>
+  <!-- Side strand right / flowing behind -->
+  <path d="M 276 200 Q 286 208, 286 222 Q 284 234, 278 240"
+    fill="#5A52B0" opacity="0.65"/>
+  <!-- Hair highlight -->
+  <path d="M 238 192 Q 250 188, 264 194"
+    stroke="#8880D8" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.5"/>
+
+  <!-- ── Face — looking toward him (eyes left) ── -->
+  <!-- Eye white -->
+  <ellipse cx="242" cy="216" rx="5" ry="4.5" fill="white"/>
+  <!-- Iris — looking left toward him -->
+  <circle cx="240" cy="216" r="3.2" fill="#3C3489"/>
+  <!-- Pupil -->
+  <circle cx="239" cy="216" r="1.5" fill="#120E30"/>
+  <!-- Eye shine -->
+  <circle cx="240" cy="214" r="1" fill="white" opacity="0.7"/>
+
+  <!-- Eyebrow -->
+  <path d="M 237 209 Q 242 206, 247 208"
+    stroke="#3C3489" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- Smile — warm -->
+  <path d="M 240 225 Q 247 232, 256 226"
+    stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85"/>
+
+  <!-- Cheek blush -->
+  <ellipse cx="234" cy="224" rx="5" ry="3" fill="#A59EEC" opacity="0.4"/>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║   HANDS ALMOST TOUCHING              ║
+       ║   — the moment of connection         ║
+       ╚══════════════════════════════════════╝ -->
+
+  <!-- Gap between hands — amber energy spark -->
+  <circle cx="200" cy="283" r="18" fill="url(#gSpark)" opacity="0.25"/>
+  <circle cx="200" cy="283" r="10" fill="#EF9F27" opacity="0.18"/>
+  <circle cx="200" cy="283" r="4"  fill="#EF9F27" opacity="0.9"/>
+
+  <!-- Tiny spark rays -->
+  <line x1="200" y1="271" x2="200" y2="266" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="200" y1="295" x2="200" y2="300" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="188" y1="283" x2="183" y2="283" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="212" y1="283" x2="217" y2="283" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="192" y1="275" x2="188" y2="271" stroke="#EF9F27" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <line x1="208" y1="275" x2="212" y2="271" stroke="#EF9F27" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║   WORDMARK                           ║
+       ╚══════════════════════════════════════╝ -->
+
+  <!-- Hairline baseline rule -->
+  <line x1="104" y1="374" x2="296" y2="374"
+    stroke="#E8E6E0" stroke-width="0.8" opacity="0.7"/>
+
+  <!-- "Love" — bold serif, rose -->
+  <text
+    x="168" y="370"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="32"
+    font-weight="700"
+    letter-spacing="1.2"
+    fill="#C0556A"
+  >Love</text>
+
+  <!-- "Path" — italic thin serif, purple -->
+  <text
+    x="244" y="370"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="32"
+    font-weight="400"
+    font-style="italic"
+    letter-spacing="0.6"
+    fill="#7F77DD"
+  >Path</text>
+
+</svg>

@@ -1,0 +1,111 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alex",
+      "email": "alex@example.com",
+      "situation": "building",
+      "primaryLanguage": "Quality Time",
+      "languageScores": { "WA": 4, "QT": 12, "RG": 2, "AS": 7, "PT": 5 },
+      "partnerId": 2,
+      "avatar": null,
+      "createdAt": "2025-03-01"
+    },
+    {
+      "id": 2,
+      "name": "Jordan",
+      "email": "jordan@example.com",
+      "situation": "building",
+      "primaryLanguage": "Words of Affirmation",
+      "languageScores": { "WA": 11, "QT": 6, "RG": 4, "AS": 5, "PT": 4 },
+      "partnerId": 1,
+      "avatar": null,
+      "createdAt": "2025-03-01"
+    }
+  ],
+  "quizResults": [],
+  "effortBalance": [
+    {
+      "id": 1,
+      "userId": 1,
+      "weekOf": "2025-03-24",
+      "user": { "initiating": 0, "listening": 0, "planning": 0, "support": 0, "honesty": 0 },
+      "partner": { "initiating": 0, "listening": 0, "planning": 0, "support": 0, "honesty": 0 }
+    }
+  ],
+  "trustCircle": [
+    {
+      "id": 1,
+      "userId": 1,
+      "name": "Jordan",
+      "role": "Partner",
+      "yourInvestment": 4,
+      "theirInvestment": 3
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "name": "Sam",
+      "role": "Close Friend",
+      "yourInvestment": 3,
+      "theirInvestment": 3
+    },
+    {
+      "id": 3,
+      "userId": 1,
+      "name": "Morgan",
+      "role": "Advisor",
+      "yourInvestment": 2,
+      "theirInvestment": 2
+    }
+  ],
+  "lovepathStage": [
+    {
+      "id": 1,
+      "userId": 1,
+      "currentStage": "Attraction",
+      "checklist": {
+        "Attraction": [false, false, false, false, false],
+        "Acceptance": [false, false, false, false, false],
+        "Attachment": [false, false, false, false, false],
+        "Aspiration": [false, false, false, false, false]
+      }
+    }
+  ],
+  "compatibility": [
+    {
+      "id": 1,
+      "userId": 1,
+      "ratings": {
+        "user":    { "physical": 0, "intellectual": 0, "emotional": 0, "values": 0, "lifeGoals": 0, "humor": 0 },
+        "partner": { "physical": 0, "intellectual": 0, "emotional": 0, "values": 0, "lifeGoals": 0, "humor": 0 }
+      }
+    }
+  ],
+  "obstacles": [
+    {
+      "id": 1,
+      "userId": 1,
+      "date": "2025-03-24",
+      "practices": {}
+    }
+  ],
+  "rebuild": [
+    {
+      "id": 1,
+      "userId": 1,
+      "user":    { "knowing": 0, "supporting": 0, "championing": 0, "leading": 0, "investing": 0 },
+      "partner": { "knowing": 0, "supporting": 0, "championing": 0, "leading": 0, "investing": 0 }
+    }
+  ],
+  "egoChecks": [],
+  "insights": [
+    { "id": 1, "source": "Beam", "category": "LovePath", "date": "2025-03-24", "text": "Attraction isn't just physical — it's intellectual, emotional, and spiritual. Relationships built on a single dimension rarely sustain.", "reflection": null },
+    { "id": 2, "source": "Holiday", "category": "Stoic", "date": "2025-03-23", "text": "The obstacle is the way. Every difficulty in your relationship is raw material for growth, not evidence of failure.", "reflection": null },
+    { "id": 3, "source": "Chapman", "category": "Love Languages", "date": "2025-03-22", "text": "People feel loved when they receive love in their primary language. Learn to speak your partner's language, not yours.", "reflection": null },
+    { "id": 4, "source": "Beam", "category": "LovePath", "date": "2025-03-21", "text": "Acceptance is the stage where you can be fully yourself and still be loved. If you're performing, you haven't arrived.", "reflection": null },
+    { "id": 5, "source": "Holiday", "category": "Stoic", "date": "2025-03-20", "text": "Ego — not incompatibility — is the primary destroyer of love. Choose the relationship over the need to be right.", "reflection": null }
+  ],
+  "reflections": [],
+  "partnerInvites": []
+}

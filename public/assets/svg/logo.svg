@@ -1,0 +1,320 @@
+<svg
+  width="400"
+  height="320"
+  viewBox="0 0 400 320"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- ═══════════════════════════════════════
+       GROUND PATH — the lovepath they walk on
+  ════════════════════════════════════════ -->
+
+  <!-- Soft path glow -->
+  <ellipse cx="200" cy="272" rx="148" ry="10" fill="#C0556A" opacity="0.10"/>
+
+  <!-- Main path road — warm rose -->
+  <path
+    d="M 44 280 Q 200 252 356 280"
+    stroke="#E8849A"
+    stroke-width="3"
+    stroke-linecap="round"
+    opacity="0.5"
+  />
+
+  <!-- Dashed path dots — stages of LovePath -->
+  <circle cx="80"  cy="272" r="3.5" fill="#C0556A" opacity="0.4"/>
+  <circle cx="116" cy="267" r="3.5" fill="#C0556A" opacity="0.5"/>
+  <circle cx="154" cy="263" r="4"   fill="#C0556A" opacity="0.65"/>
+  <circle cx="193" cy="261" r="4.5" fill="#C0556A" opacity="0.8"/>
+  <circle cx="232" cy="261" r="5"   fill="#C0556A"/>
+  <circle cx="272" cy="263" r="4.5" fill="#7F77DD" opacity="0.85"/>
+  <circle cx="308" cy="267" r="4"   fill="#7F77DD" opacity="0.7"/>
+  <circle cx="340" cy="271" r="3.5" fill="#7F77DD" opacity="0.5"/>
+
+  <!-- ═══════════════════════════════════════
+       GROWING HEART — blooms above them
+       Starts small, becomes large
+  ════════════════════════════════════════ -->
+
+  <!-- Outer heart glow -->
+  <path
+    d="M 200 164
+       C 180 148, 148 152, 148 178
+       C 148 200, 170 218, 200 238
+       C 230 218, 252 200, 252 178
+       C 252 152, 220 148, 200 164 Z"
+    fill="#C0556A"
+    opacity="0.12"
+  />
+
+  <!-- Main heart -->
+  <path
+    d="M 200 172
+       C 184 158, 157 162, 157 183
+       C 157 202, 176 216, 200 232
+       C 224 216, 243 202, 243 183
+       C 243 162, 216 158, 200 172 Z"
+    fill="#C0556A"
+    opacity="0.92"
+  />
+
+  <!-- Heart inner highlight -->
+  <path
+    d="M 172 174 C 163 180, 159 192, 162 202"
+    stroke="white"
+    stroke-width="4"
+    stroke-linecap="round"
+    opacity="0.45"
+  />
+
+  <!-- Small sparkle stars radiating from heart -->
+  <!-- Top left sparkle -->
+  <g transform="translate(148, 152)" opacity="0.8">
+    <line x1="0" y1="-7" x2="0" y2="7"  stroke="#C0556A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-7" y1="0" x2="7" y2="0"  stroke="#C0556A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-5" y1="-5" x2="5" y2="5" stroke="#C0556A" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="5" y1="-5" x2="-5" y2="5" stroke="#C0556A" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Top right sparkle -->
+  <g transform="translate(254, 148)" opacity="0.7">
+    <line x1="0" y1="-6" x2="0" y2="6"   stroke="#7F77DD" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-6" y1="0" x2="6" y2="0"   stroke="#7F77DD" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-4" y1="-4" x2="4" y2="4"  stroke="#7F77DD" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="4" y1="-4" x2="-4" y2="4"  stroke="#7F77DD" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Tiny sparkle top center -->
+  <g transform="translate(200, 132)" opacity="0.6">
+    <line x1="0" y1="-5" x2="0" y2="5"   stroke="#C0556A" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-5" y1="0" x2="5" y2="0"   stroke="#C0556A" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Small dots floating up from heart -->
+  <circle cx="188" cy="142" r="2.5" fill="#C0556A" opacity="0.4"/>
+  <circle cx="210" cy="136" r="2"   fill="#7F77DD" opacity="0.35"/>
+  <circle cx="196" cy="126" r="1.5" fill="#C0556A" opacity="0.25"/>
+
+  <!-- ═══════════════════════════════════════
+       PERSON A — HIM (left, slightly behind)
+       Walking forward, head turned slightly
+       toward her — warm rose tones
+  ════════════════════════════════════════ -->
+
+  <!-- Person A shadow -->
+  <ellipse cx="152" cy="278" rx="18" ry="5" fill="#C0556A" opacity="0.12"/>
+
+  <!-- Person A — back leg (walking stride) -->
+  <line x1="152" y1="242" x2="138" y2="272"
+    stroke="#A83050" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Person A — front leg -->
+  <line x1="152" y1="242" x2="162" y2="270"
+    stroke="#C0556A" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Person A — body torso -->
+  <path
+    d="M 152 194 C 148 210, 146 228, 152 242"
+    stroke="#C0556A"
+    stroke-width="10"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Person A — back arm (swinging back) -->
+  <path
+    d="M 150 208 Q 134 218, 130 232"
+    stroke="#A83050"
+    stroke-width="7"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Person A — front arm (reaching toward her) -->
+  <path
+    d="M 150 208 Q 168 216, 178 224"
+    stroke="#C0556A"
+    stroke-width="7"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Person A — neck -->
+  <line x1="152" y1="182" x2="152" y2="194"
+    stroke="#C0556A" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Person A — head -->
+  <circle cx="152" cy="172" r="20" fill="#C0556A"/>
+
+  <!-- Person A — hair (short, masculine) -->
+  <path
+    d="M 134 168 Q 136 150, 152 150 Q 168 150, 170 168"
+    fill="#A83050"
+  />
+
+  <!-- Person A — face: eye looking toward her (right side) -->
+  <circle cx="158" cy="170" r="3" fill="white"/>
+  <circle cx="159" cy="170" r="1.8" fill="#7A1A30"/>
+
+  <!-- Person A — smile -->
+  <path
+    d="M 147 178 Q 153 183, 159 178"
+    stroke="white"
+    stroke-width="2"
+    stroke-linecap="round"
+    fill="none"
+    opacity="0.85"
+  />
+
+  <!-- ═══════════════════════════════════════
+       PERSON B — HER (right, slightly ahead)
+       Walking forward, head turned slightly
+       toward him — warm purple/teal tones
+  ════════════════════════════════════════ -->
+
+  <!-- Person B shadow -->
+  <ellipse cx="248" cy="278" rx="18" ry="5" fill="#7F77DD" opacity="0.12"/>
+
+  <!-- Person B — back leg -->
+  <line x1="248" y1="242" x2="262" y2="272"
+    stroke="#6A62C4" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Person B — front leg -->
+  <line x1="248" y1="242" x2="238" y2="270"
+    stroke="#7F77DD" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Person B — body torso (slightly more slender curve) -->
+  <path
+    d="M 248 194 C 252 210, 254 228, 248 242"
+    stroke="#7F77DD"
+    stroke-width="9"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Person B — back arm (swinging back) -->
+  <path
+    d="M 250 208 Q 266 218, 270 232"
+    stroke="#6A62C4"
+    stroke-width="6.5"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Person B — front arm (reaching toward him) -->
+  <path
+    d="M 250 208 Q 232 216, 222 224"
+    stroke="#7F77DD"
+    stroke-width="6.5"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Person B — neck -->
+  <line x1="248" y1="182" x2="248" y2="194"
+    stroke="#7F77DD" stroke-width="7.5" stroke-linecap="round"/>
+
+  <!-- Person B — head -->
+  <circle cx="248" cy="172" r="19" fill="#7F77DD"/>
+
+  <!-- Person B — hair (longer, flowing to one side) -->
+  <path
+    d="M 230 165 Q 232 148, 248 148 Q 264 148, 268 158
+       Q 270 168, 268 174 Q 272 164, 274 172
+       Q 270 180, 268 186"
+    fill="#6A62C4"
+  />
+  <!-- Hair flowing behind -->
+  <path
+    d="M 268 158 Q 278 160, 280 172 Q 280 182, 274 188"
+    fill="#6A62C4"
+    opacity="0.7"
+  />
+
+  <!-- Person B — face: eye looking toward him (left side) -->
+  <circle cx="242" cy="170" r="3" fill="white"/>
+  <circle cx="241" cy="170" r="1.8" fill="#3C3489"/>
+
+  <!-- Person B — smile -->
+  <path
+    d="M 241 178 Q 247 183, 253 178"
+    stroke="white"
+    stroke-width="2"
+    stroke-linecap="round"
+    fill="none"
+    opacity="0.85"
+  />
+
+  <!-- ═══════════════════════════════════════
+       HANDS ALMOST TOUCHING — the connection
+       Their front arms reach toward each other
+       but haven't quite closed the gap yet
+       (honesty — love is a journey)
+  ════════════════════════════════════════ -->
+
+  <!-- Him reaching hand -->
+  <circle cx="180" cy="226" r="7" fill="#C0556A"/>
+  <!-- Her reaching hand -->
+  <circle cx="220" cy="226" r="7" fill="#7F77DD"/>
+
+  <!-- Tiny gap + sparkle between hands -->
+  <circle cx="200" cy="226" r="2.5" fill="#EF9F27" opacity="0.9"/>
+  <circle cx="200" cy="226" r="5"   fill="#EF9F27" opacity="0.2"/>
+
+  <!-- ═══════════════════════════════════════
+       WORDMARK — "LovePath"
+  ════════════════════════════════════════ -->
+
+  <!-- Subtle baseline -->
+  <line x1="100" y1="305" x2="300" y2="305"
+    stroke="#E8E6E0" stroke-width="1" opacity="0.6"/>
+
+  <text
+    x="200"
+    y="300"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="28"
+    font-weight="700"
+    letter-spacing="1"
+    fill="#C0556A"
+  >Love</text>
+
+  <!-- Render "Path" as a separate element shifted right -->
+  <text
+    x="267"
+    y="300"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="28"
+    font-weight="400"
+    font-style="italic"
+    letter-spacing="0.5"
+    fill="#7F77DD"
+  >Path</text>
+
+  <!-- ═══════════════════════════════════════
+       SMALL STAGE LABELS under the path dots
+       (tiny, subtle — the 4 LovePath stages)
+  ════════════════════════════════════════ -->
+  <text x="116" y="285" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="7" letter-spacing="0.5" fill="#C0556A" opacity="0.55"
+  >ATTRACT</text>
+
+  <text x="154" y="280" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="7" letter-spacing="0.5" fill="#C0556A" opacity="0.65"
+  >ACCEPT</text>
+
+  <text x="200" y="277" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="7" letter-spacing="0.5" fill="#C0556A" opacity="0.8"
+  >ATTACH</text>
+
+  <text x="272" y="278" text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, sans-serif"
+    font-size="7" letter-spacing="0.5" fill="#7F77DD" opacity="0.8"
+  >ASPIRE</text>
+
+</svg>
